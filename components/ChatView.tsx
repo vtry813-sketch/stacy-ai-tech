@@ -95,7 +95,7 @@ const ChatView: React.FC<ChatViewProps> = ({ session, settings, updateMessages, 
 
   if (!session) {
     return (
-      <div className="flex flex-col items-center justify-center h-full text-slate-500 animate-in fade-in duration-700 px-4">
+      <div className="flex flex-col items-center justify-center flex-1 min-h-0 text-slate-500 animate-in fade-in duration-700 px-4">
         <div className="w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-indigo-500/5 flex items-center justify-center mb-6">
           <Sparkles className="text-indigo-500 opacity-40 w-8 h-8 md:w-10 md:h-10" />
         </div>
@@ -106,7 +106,7 @@ const ChatView: React.FC<ChatViewProps> = ({ session, settings, updateMessages, 
   }
 
   return (
-    <div className="flex flex-col h-full w-full max-w-4xl mx-auto overflow-hidden bg-transparent">
+    <div className="flex flex-col flex-1 min-h-0 w-full max-w-4xl mx-auto overflow-hidden bg-transparent">
       {/* Messages area */}
       <div 
         ref={scrollContainerRef}
@@ -168,8 +168,8 @@ const ChatView: React.FC<ChatViewProps> = ({ session, settings, updateMessages, 
         )}
       </div>
 
-      {/* Raised Input area - Adjusted Padding */}
-      <div className="w-full bg-transparent px-3 md:px-6 pt-2 pb-6 md:pb-10">
+      {/* Raised Input area */}
+      <div className="w-full bg-transparent px-3 md:px-6 pt-2 pb-6 md:pb-10 shrink-0">
         <form onSubmit={handleSubmit} className="relative max-w-4xl mx-auto group">
           <div className="relative flex items-end gap-2 bg-slate-800/60 backdrop-blur-xl border border-slate-700/80 rounded-2xl md:rounded-[2rem] p-2 md:p-3 shadow-[0_20px_50px_rgba(0,0,0,0.5)] focus-within:border-indigo-500/50 focus-within:bg-slate-800/80 transition-all duration-300">
             <textarea 

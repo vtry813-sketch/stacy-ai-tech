@@ -135,25 +135,48 @@ const App: React.FC = () => {
 
   return (
     <div className={`flex h-screen overflow-hidden transition-colors duration-300 ${settings.theme === 'light' ? 'bg-slate-50 text-slate-900' : 'bg-indigo-950 text-slate-100'}`}>
-      <div className={`fixed inset-0 bg-black/50 z-[60] backdrop-blur-sm transition-opacity duration-300 lg:hidden ${isSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setIsSidebarOpen(false)} />
+      <div className={`fixed inset-0 bg-black/50 z-[80] backdrop-blur-sm transition-opacity duration-300 lg:hidden ${isSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setIsSidebarOpen(false)} />
       
-      <div className={`fixed lg:relative z-[70] h-full transition-transform duration-300 ease-out lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0 w-[280px]' : '-translate-x-full lg:w-0 lg:opacity-0 overflow-hidden'}`}>
+      <div className={`fixed lg:relative z-[90] h-full transition-transform duration-300 ease-out lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0 w-[280px]' : '-translate-x-full lg:w-0 lg:opacity-0 overflow-hidden'}`}>
         <Sidebar sessions={sessions} activeId={activeSessionId} onSelect={selectSession} onNew={createNewChat} onDelete={deleteSession} currentPage={currentPage} setPage={setCurrentPage} avatar={STACY_AVATAR} settings={settings} />
       </div>
 
       <main className="flex-1 relative flex flex-col h-full overflow-hidden z-10">
-        {/* Fixed Header for Mobile */}
-        <div className="flex items-center justify-between px-4 h-16 shrink-0 lg:hidden bg-slate-900/40 backdrop-blur-md border-b border-white/5 sticky top-0 z-50">
-          <button onClick={() => setIsSidebarOpen(true)} className="p-2.5 glass-panel rounded-xl shadow-lg border-indigo-500/10 active:scale-95 transition-transform"><Menu size={20} /></button>
+        {/* Mobile Header - Improved shrink-0 and fixed height to prevent displacement */}
+        <header className="flex lg:hidden items-center justify-between px-4 h-16 shrink-0 bg-slate-900/60 backdrop-blur-xl border-b border-white/10 z-[50]">
+          <button 
+            onClick={() => setIsSidebarOpen(true)} 
+            className="p-2.5 glass-panel rounded-xl shadow-lg border-white/5 active:scale-90 transition-all text-slate-200"
+            aria-label="Open menu"
+          >
+            <Menu size={20} />
+          </button>
+          
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg overflow-hidden stacy-gradient p-0.5 shadow-lg"><img src={STACY_AVATAR} className="w-full h-full object-cover rounded-[6px]" /></div>
-            <span className="font-bold tracking-tight text-slate-200">Stacy AI</span>
+            <div className="w-8 h-8 rounded-lg overflow-hidden stacy-gradient p-0.5 shadow-indigo-500/20 shadow-lg">
+              <img src={STACY_AVATAR} className="w-full h-full object-cover rounded-[6px]" alt="Avatar" />
+            </div>
+            <span className="font-bold tracking-tight text-slate-100">Stacy AI</span>
           </div>
-          <button onClick={toggleTheme} className="p-2.5 glass-panel rounded-xl shadow-lg border-indigo-500/10 active:scale-95 transition-transform">{settings.theme === 'dark' ? <Sun size={20} className="text-yellow-400" /> : <Moon size={20} className="text-indigo-600" />}</button>
-        </div>
+          
+          <button 
+            onClick={toggleTheme} 
+            className="p-2.5 glass-panel rounded-xl shadow-lg border-white/5 active:scale-90 transition-all"
+            aria-label="Toggle theme"
+          >
+            {settings.theme === 'dark' ? <Sun size={20} className="text-yellow-400" /> : <Moon size={20} className="text-indigo-600" />}
+          </button>
+        </header>
 
-        <button onClick={toggleTheme} className="hidden lg:flex fixed top-4 right-4 z-[100] p-2.5 glass-panel rounded-xl shadow-lg border-indigo-500/10 hover:scale-110 active:scale-95 transition-all">{settings.theme === 'dark' ? <Sun size={20} className="text-yellow-400" /> : <Moon size={20} className="text-indigo-600" />}</button>
+        {/* Desktop Theme Toggle */}
+        <button 
+          onClick={toggleTheme} 
+          className="hidden lg:flex fixed top-4 right-4 z-[100] p-2.5 glass-panel rounded-xl shadow-lg border-indigo-500/10 hover:scale-110 active:scale-95 transition-all"
+        >
+          {settings.theme === 'dark' ? <Sun size={20} className="text-yellow-400" /> : <Moon size={20} className="text-indigo-600" />}
+        </button>
 
+        {/* Current Page Content */}
         {renderPage()}
       </main>
     </div>

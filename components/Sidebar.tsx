@@ -11,7 +11,8 @@ import {
   Trash2,
   Clock,
   Search,
-  X
+  X,
+  BookOpen
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -114,6 +115,12 @@ const Sidebar: React.FC<SidebarProps> = ({
           label={t.nav.dashboard} 
           active={currentPage === Page.Dashboard} 
           onClick={() => setPage(Page.Dashboard)} 
+        />
+        <NavItem 
+          icon={<BookOpen size={18} />} 
+          label={t.nav.docs} 
+          active={currentPage === Page.Documentation} 
+          onClick={() => setPage(Page.Documentation)} 
         />
         <NavItem 
           icon={<SettingsIcon size={18} />} 
