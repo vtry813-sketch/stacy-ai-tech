@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { UserSettings } from '../types.ts';
 import { translations, Language } from '../translations.ts';
@@ -132,14 +131,14 @@ print(res.json()['content'])`;
                 <AlertTriangle size={40} />
               </div>
             </div>
-            <h3 className="text-xl font-bold text-center mb-4">Regenerate API Key?</h3>
+            <h3 className="text-xl font-bold text-center mb-4">{t.dashboard.regenConfirm}</h3>
             <p className="text-slate-400 text-sm text-center mb-8 leading-relaxed">
-              Are you sure? This will immediately invalidate your old key and break existing integrations.
+              {t.dashboard.regenWarning}
             </p>
             <div className="flex gap-3">
-              <button onClick={() => setShowRegenConfirm(false)} className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 rounded-2xl text-sm font-bold transition-all">Cancel</button>
+              <button onClick={() => setShowRegenConfirm(false)} className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 rounded-2xl text-sm font-bold transition-all">{t.dashboard.cancel}</button>
               <button onClick={confirmRegen} className="flex-1 py-3 bg-indigo-600 hover:bg-indigo-500 rounded-2xl text-sm font-bold transition-all shadow-lg flex items-center justify-center gap-2">
-                {isRegenerating ? <Loader2 size={18} className="animate-spin" /> : 'Confirm'}
+                {isRegenerating ? <Loader2 size={18} className="animate-spin" /> : t.dashboard.confirm}
               </button>
             </div>
           </div>
@@ -149,11 +148,11 @@ print(res.json()['content'])`;
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-black tracking-tight mb-1 bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-500 uppercase">{t.dashboard.title}</h1>
-          <p className="text-slate-400 text-sm font-medium">{t.dashboard.subtitle}</p>
+          <p className="text-slate-400 text-xs">{t.dashboard.subtitle}</p>
         </div>
         <div className="flex items-center gap-2 px-3 py-1.5 bg-green-500/10 border border-green-500/20 rounded-full">
           <ShieldCheck size={14} className="text-green-400" />
-          <span className="text-[10px] font-bold text-green-400 uppercase tracking-widest">{t.dashboard.verified}</span>
+          <span className="text-[9px] font-bold text-green-400 uppercase tracking-widest">{t.dashboard.verified}</span>
         </div>
       </header>
 
@@ -168,10 +167,10 @@ print(res.json()['content'])`;
                   <Command size={32} />
                 </div>
                 <div>
-                  <h2 className="text-3xl font-black text-white uppercase tracking-tighter">Developer Integration Hub</h2>
+                  <h2 className="text-3xl font-black text-white uppercase tracking-tighter">{t.dashboard.devHub.title}</h2>
                   <div className="flex items-center gap-2 mt-1">
                     <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></span>
-                    <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Stacy API v3.0 REST Interface</p>
+                    <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">{t.dashboard.devHub.version}</p>
                   </div>
                 </div>
               </div>
@@ -180,11 +179,11 @@ print(res.json()['content'])`;
                 <div className="space-y-4">
                   <h3 className="text-lg font-bold text-slate-100 flex items-center gap-2">
                     <Layers size={18} className="text-indigo-400" />
-                    How to install the Stacy SDK
+                    {t.dashboard.devHub.installTitle}
                   </h3>
                   <div className="bg-black/40 rounded-xl p-4 border border-slate-800 font-mono text-xs text-indigo-300 flex items-center justify-between">
-                    <span>npm install @stacy/sdk --save</span>
-                    <button onClick={() => handleCopy('npm install @stacy/sdk --save', setCopied)} className="hover:text-white transition-colors">
+                    <span>{t.dashboard.devHub.npmCommand}</span>
+                    <button onClick={() => handleCopy(t.dashboard.devHub.npmCommand, setCopied)} className="hover:text-white transition-colors">
                       {copied ? <Check size={14} /> : <Copy size={14} />}
                     </button>
                   </div>
@@ -193,12 +192,12 @@ print(res.json()['content'])`;
                 <div className="space-y-4">
                   <h3 className="text-lg font-bold text-slate-100 flex items-center gap-2">
                     <FileCode size={18} className="text-purple-400" />
-                    Integration Steps
+                    {t.dashboard.devHub.stepsTitle}
                   </h3>
                   <div className="grid grid-cols-1 gap-3">
-                    <DocStep number="01" title="Generate Key" desc="Get your personal Stacy Neural Key below." />
-                    <DocStep number="02" title="Auth Header" desc="Use 'Authorization: Bearer <KEY>' in your requests." />
-                    <DocStep number="03" title="Base URL" desc="Endpoint: stacy-ai.vercel.app/api/v1/chat" />
+                    <DocStep number="01" title={t.dashboard.devHub.step1.title} desc={t.dashboard.devHub.step1.desc} />
+                    <DocStep number="02" title={t.dashboard.devHub.step2.title} desc={t.dashboard.devHub.step2.desc} />
+                    <DocStep number="03" title={t.dashboard.devHub.step3.title} desc={t.dashboard.devHub.step3.desc} />
                   </div>
                 </div>
               </div>
@@ -258,7 +257,7 @@ print(res.json()['content'])`;
             <Key size={22} className="text-indigo-400" />
             <h2 className="text-lg font-black uppercase tracking-tight">{t.dashboard.api.title}</h2>
           </div>
-          {regenSuccess && <div className="text-green-400 text-[10px] font-black animate-pulse uppercase tracking-widest">Neural Key Updated</div>}
+          {regenSuccess && <div className="text-green-400 text-[9px] font-black animate-pulse uppercase tracking-widest">{t.dashboard.api.updated}</div>}
         </div>
         
         <div className="p-6 space-y-6">
@@ -285,7 +284,7 @@ print(res.json()['content'])`;
           
           <div className="p-4 bg-indigo-500/5 border border-indigo-500/10 rounded-2xl flex items-center gap-3">
             <Zap size={16} className="text-indigo-400" />
-            <p className="text-xs text-indigo-200/60 font-medium">Use this key in your project as shown in the Documentation above.</p>
+            <p className="text-xs text-indigo-200/60 font-medium">{t.dashboard.api.usageTip}</p>
           </div>
         </div>
       </section>
