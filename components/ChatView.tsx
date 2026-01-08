@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { ChatSession, Message, UserSettings } from '../types.ts';
 import { User, Sparkles, ArrowUpCircle } from 'lucide-react';
@@ -168,8 +167,8 @@ const ChatView: React.FC<ChatViewProps> = ({ session, settings, updateMessages, 
         )}
       </div>
 
-      {/* Raised Input area with adjusted padding */}
-      <div className="w-full bg-transparent px-3 md:px-6 pt-2 pb-4 md:pb-6">
+      {/* Input area - PADDINGS CORRIGÉS */}
+      <div className="w-full bg-transparent px-3 md:px-6 pb-3 pt-2">
         <form onSubmit={handleSubmit} className="relative max-w-4xl mx-auto group">
           <div className="relative flex items-end gap-2 bg-slate-800/60 backdrop-blur-xl border border-slate-700/80 rounded-2xl md:rounded-[2rem] p-2 md:p-3 shadow-[0_20px_50px_rgba(0,0,0,0.5)] focus-within:border-indigo-500/50 focus-within:bg-slate-800/80 transition-all duration-300">
             <textarea 
