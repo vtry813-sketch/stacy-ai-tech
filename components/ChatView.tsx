@@ -168,10 +168,10 @@ const ChatView: React.FC<ChatViewProps> = ({ session, settings, updateMessages, 
         )}
       </div>
 
-      {/* Input area */}
-      <div className="w-full bg-white/5 md:bg-transparent lg:border-t-0 border-t border-slate-800/20 px-3 pt-2 pb-4 md:px-6 md:pt-3 md:pb-6">
+      {/* Elevated Input area with more breathing room */}
+      <div className="w-full bg-transparent px-3 md:px-6 pt-2 pb-8 md:pb-12">
         <form onSubmit={handleSubmit} className="relative max-w-4xl mx-auto group">
-          <div className="relative flex items-end gap-2 bg-slate-800/40 border border-slate-700/60 rounded-xl md:rounded-2xl p-1.5 md:p-2 shadow-2xl focus-within:border-indigo-500/50 focus-within:bg-slate-800/70 transition-all duration-200">
+          <div className="relative flex items-end gap-2 bg-slate-800/60 backdrop-blur-xl border border-slate-700/80 rounded-2xl md:rounded-[2rem] p-2 md:p-3 shadow-[0_20px_50px_rgba(0,0,0,0.5)] focus-within:border-indigo-500/50 focus-within:bg-slate-800/80 transition-all duration-300">
             <textarea 
               rows={1}
               value={input}
@@ -187,18 +187,18 @@ const ChatView: React.FC<ChatViewProps> = ({ session, settings, updateMessages, 
                 }
               }}
               placeholder={t.chat.placeholder}
-              className="flex-1 bg-transparent border-none outline-none px-2 py-2 md:px-3 text-slate-100 placeholder:text-slate-600 resize-none max-h-[200px] text-[14px] md:text-[15px] leading-snug"
+              className="flex-1 bg-transparent border-none outline-none px-3 py-2 md:px-4 text-slate-100 placeholder:text-slate-600 resize-none max-h-[200px] text-[15px] md:text-[16px] leading-relaxed"
               disabled={isTyping}
             />
             <button 
               type="submit"
               disabled={!input.trim() || isTyping}
-              className={`p-1.5 md:p-2 rounded-lg md:rounded-xl transition-all flex items-center justify-center mb-0.5 shadow-md ${!input.trim() || isTyping ? 'bg-slate-700 text-slate-500 opacity-20 cursor-not-allowed' : 'bg-white text-[#0f172a] hover:bg-slate-200 active:scale-95'}`}
+              className={`p-2 md:p-3 rounded-xl md:rounded-2xl transition-all flex items-center justify-center mb-1 shadow-lg ${!input.trim() || isTyping ? 'bg-slate-700/50 text-slate-500 opacity-20 cursor-not-allowed' : 'bg-indigo-600 text-white hover:bg-indigo-500 hover:scale-105 active:scale-95'}`}
             >
-              <ArrowUpCircle size={20} fill="currentColor" />
+              <ArrowUpCircle size={22} fill="currentColor" />
             </button>
           </div>
-          <p className="text-[8px] md:text-[9px] text-center text-slate-600 mt-1.5 font-medium tracking-wide uppercase opacity-40">{t.chat.engineInfo}</p>
+          <p className="text-[9px] text-center text-slate-600 mt-2 font-black tracking-[0.2em] uppercase opacity-30">{t.chat.engineInfo}</p>
         </form>
       </div>
     </div>
@@ -211,7 +211,7 @@ const QuickPrompt: React.FC<{ text: string; onClick: () => void }> = ({ text, on
     className="px-3 py-2.5 md:px-4 md:py-3 bg-slate-800/30 border border-slate-700/40 rounded-xl md:rounded-2xl text-left text-[12px] md:text-[13px] text-slate-300 hover:bg-slate-800/60 hover:border-indigo-500/40 transition-all shadow-md group"
   >
     <div className="flex items-center justify-between gap-2">
-      <span className="truncate">{text}</span>
+      <span className="truncate font-medium">{text}</span>
       <Sparkles size={10} className="text-indigo-500/50 group-hover:text-indigo-400 transition-colors shrink-0" />
     </div>
   </button>

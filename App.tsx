@@ -32,19 +32,21 @@ const App: React.FC = () => {
 
   const t = translations[settings.language as Language] || translations.English;
 
-  // Sync logic for PWA Installation
+  // Sync logic for PWA Installation - capturing the native browser event
   useEffect(() => {
     const handleBeforeInstallPrompt = (e: Event) => {
+      // Prevent the mini-infobar from appearing on mobile
       e.preventDefault();
+      // Stash the event so it can be triggered later.
       setDeferredPrompt(e);
-      console.log('Installation prompt captured');
+      console.log('Native Install Prompt Captured');
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     
-    window.addEventListener('appinstalled', () => {
+    window.addEventListener('appinstalled', (evt) => {
       setDeferredPrompt(null);
-      console.log('Stacy AI was installed');
+      console.log('Stacy AI has been installed successfully');
     });
 
     return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -135,15 +137,17 @@ const App: React.FC = () => {
 
   const triggerInstall = async () => {
     if (deferredPrompt) {
+      // Trigger the native browser install dialog
       deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
-      console.log(`User response to the install prompt: ${outcome}`);
+      console.log(`User Choice Outcome: ${outcome}`);
+      // Clear the deferred prompt variable as it can only be used once
       setDeferredPrompt(null);
     } else {
-      // Si pas de prompt détecté (ex: iOS ou déjà installé), on montre les instructions manuelles
+      // Fallback for browsers/devices where the event wasn't fired or isn't supported (like Safari)
       alert(settings.language === 'French' 
-        ? "Pour installer Stacy sur Android :\n1. Appuyez sur les (⋮) en haut à droite.\n2. Sélectionnez 'Installer l'application' ou 'Ajouter à l'écran d'accueil'." 
-        : "To install Stacy on Android:\n1. Tap the (⋮) menu in the top right.\n2. Select 'Install app' or 'Add to Home screen'.");
+        ? "Le navigateur n'a pas encore détecté l'éligibilité APK.\n\nAssurez-vous d'utiliser Chrome sur Android, puis :\n1. Cliquez sur les (⋮) en haut à droite.\n2. Sélectionnez 'Installer l'application' ou 'Ajouter à l'écran d'accueil'." 
+        : "The browser has not detected APK eligibility yet.\n\nMake sure you use Chrome on Android, then:\n1. Tap the (⋮) menu in the top right.\n2. Select 'Install app' or 'Add to Home screen'.");
     }
   };
 
