@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
-import { UserSettings } from '../types';
-import { translations, Language } from '../translations';
+import { UserSettings } from '../types.ts';
+import { translations, Language } from '../translations.ts';
 import { 
   User, 
   Moon, 
@@ -54,7 +54,6 @@ const Settings: React.FC<SettingsProps> = ({ settings, onUpdate, onClearHistory 
       </header>
 
       <div className="grid grid-cols-1 gap-5">
-        {/* Identité Section */}
         <SettingSection 
           title={t.settings.identity} 
           description={t.settings.identityDesc}
@@ -90,7 +89,6 @@ const Settings: React.FC<SettingsProps> = ({ settings, onUpdate, onClearHistory 
           </div>
         </SettingSection>
 
-        {/* Intelligence Section */}
         <SettingSection 
           title={t.settings.intel} 
           description={t.settings.intelDesc}
@@ -111,12 +109,7 @@ const Settings: React.FC<SettingsProps> = ({ settings, onUpdate, onClearHistory 
                 onChange={(e) => handleChange('temperature', parseFloat(e.target.value))}
                 className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-purple-500"
               />
-              <div className="flex justify-between mt-1 text-[9px] font-bold text-slate-600 uppercase">
-                <span>{t.settings.prec}</span>
-                <span>{t.settings.crea}</span>
-              </div>
             </div>
-
             <div className="space-y-1.5">
               <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">{t.settings.perso}</label>
               <textarea 
@@ -124,13 +117,11 @@ const Settings: React.FC<SettingsProps> = ({ settings, onUpdate, onClearHistory 
                 value={settings.personality}
                 onChange={(e) => handleChange('personality', e.target.value)}
                 className="w-full bg-slate-900/60 border border-slate-700/50 rounded-xl px-4 py-2 text-slate-100 outline-none focus:border-purple-500/50 transition-all resize-none shadow-inner text-sm leading-relaxed"
-                placeholder={t.settings.persoPlaceholder}
               />
             </div>
           </div>
         </SettingSection>
 
-        {/* Interface Section */}
         <SettingSection 
           title={t.settings.prefs} 
           description={t.settings.prefsDesc}
@@ -154,7 +145,6 @@ const Settings: React.FC<SettingsProps> = ({ settings, onUpdate, onClearHistory 
           </div>
         </SettingSection>
 
-        {/* Danger Zone - Global History Deletion */}
         <div className="bg-red-500/5 border border-red-500/10 rounded-2xl p-4 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-red-500/10 rounded-lg text-red-500">
@@ -167,13 +157,12 @@ const Settings: React.FC<SettingsProps> = ({ settings, onUpdate, onClearHistory 
           </div>
           <button 
             onClick={onClearHistory}
-            className="px-4 py-1.5 bg-red-600/80 hover:bg-red-500 text-white text-[10px] font-bold rounded-lg transition-all shadow-lg shadow-red-900/10 active:scale-95 whitespace-nowrap"
+            className="px-4 py-1.5 bg-red-600/80 hover:bg-red-500 text-white text-[10px] font-bold rounded-lg transition-all"
           >
             {t.settings.deleteAll}
           </button>
         </div>
 
-        {/* Footer actions */}
         <div className="flex justify-between items-center pt-2 px-2">
           <div className="flex items-center gap-2 text-slate-600 text-[10px] font-medium italic">
             <Info size={12} />
@@ -183,7 +172,7 @@ const Settings: React.FC<SettingsProps> = ({ settings, onUpdate, onClearHistory 
             onClick={handleSave}
             className="group flex items-center gap-2 px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-[11px] font-bold transition-all shadow-md active:scale-95"
           >
-            <Save size={14} className="group-hover:scale-110 transition-transform" />
+            <Save size={14} />
             {t.settings.save}
           </button>
         </div>

@@ -1,13 +1,13 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Page, ChatSession, UserSettings, Message } from './types';
-import Sidebar from './components/Sidebar';
-import Home from './components/Home';
-import ChatView from './components/ChatView';
-import Dashboard from './components/Dashboard';
-import Settings from './components/Settings';
+import { Page, ChatSession, UserSettings, Message } from './types.ts';
+import Sidebar from './components/Sidebar.tsx';
+import Home from './components/Home.tsx';
+import ChatView from './components/ChatView.tsx';
+import Dashboard from './components/Dashboard.tsx';
+import Settings from './components/Settings.tsx';
 import { Menu, X, Moon, Sun } from 'lucide-react';
-import { translations, Language } from './translations';
+import { translations, Language } from './translations.ts';
 
 const STACY_AVATAR = "https://files.catbox.moe/don5ye.jpg";
 

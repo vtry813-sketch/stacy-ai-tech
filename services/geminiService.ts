@@ -1,15 +1,13 @@
 
 import { GoogleGenAI } from "@google/genai";
 
-const API_KEY = process.env.API_KEY || "";
-
 export const generateStacyResponse = async (
   prompt: string,
   history: { role: "user" | "model"; parts: { text: string }[] }[],
   systemInstruction: string,
   temperature: number = 0.7
 ) => {
-  const ai = new GoogleGenAI({ apiKey: API_KEY });
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || "" });
   
   try {
     const response = await ai.models.generateContent({
@@ -40,7 +38,7 @@ export const streamStacyResponse = async (
   onChunk: (text: string) => void,
   temperature: number = 0.7
 ) => {
-  const ai = new GoogleGenAI({ apiKey: API_KEY });
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || "" });
   
   try {
     const chat = ai.chats.create({

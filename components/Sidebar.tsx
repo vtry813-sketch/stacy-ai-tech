@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
-import { Page, ChatSession, UserSettings } from '../types';
-import { translations, Language } from '../translations';
+import { Page, ChatSession, UserSettings } from '../types.ts';
+import { translations, Language } from '../translations.ts';
 import { 
   Plus, 
   LayoutDashboard, 
@@ -41,12 +41,14 @@ const Sidebar: React.FC<SidebarProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
 
   const userInitials = settings.userName
-    .split(' ')
-    .filter(Boolean)
-    .map(n => n[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2);
+    ? settings.userName
+        .split(' ')
+        .filter(Boolean)
+        .map(n => n[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2)
+    : 'U';
 
   const filteredSessions = sessions.filter(session => 
     session.title.toLowerCase().includes(searchQuery.toLowerCase())

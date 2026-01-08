@@ -1,9 +1,9 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { ChatSession, Message, UserSettings } from '../types';
+import { ChatSession, Message, UserSettings } from '../types.ts';
 import { User, Sparkles, ArrowUpCircle } from 'lucide-react';
-import { streamStacyResponse } from '../services/geminiService';
-import { translations, Language } from '../translations';
+import { streamStacyResponse } from '../services/geminiService.ts';
+import { translations, Language } from '../translations.ts';
 
 interface ChatViewProps {
   session: ChatSession | undefined;
@@ -168,7 +168,7 @@ const ChatView: React.FC<ChatViewProps> = ({ session, settings, updateMessages, 
         )}
       </div>
 
-      {/* Input area - lowered for better ergonomic reach and safe area compatibility */}
+      {/* Input area */}
       <div className="w-full bg-white/5 md:bg-transparent lg:border-t-0 border-t border-slate-800/20 px-3 pt-2 pb-4 md:px-6 md:pt-3 md:pb-6">
         <form onSubmit={handleSubmit} className="relative max-w-4xl mx-auto group">
           <div className="relative flex items-end gap-2 bg-slate-800/40 border border-slate-700/60 rounded-xl md:rounded-2xl p-1.5 md:p-2 shadow-2xl focus-within:border-indigo-500/50 focus-within:bg-slate-800/70 transition-all duration-200">
@@ -195,7 +195,7 @@ const ChatView: React.FC<ChatViewProps> = ({ session, settings, updateMessages, 
               disabled={!input.trim() || isTyping}
               className={`p-1.5 md:p-2 rounded-lg md:rounded-xl transition-all flex items-center justify-center mb-0.5 shadow-md ${!input.trim() || isTyping ? 'bg-slate-700 text-slate-500 opacity-20 cursor-not-allowed' : 'bg-white text-[#0f172a] hover:bg-slate-200 active:scale-95'}`}
             >
-              <ArrowUpCircle size={20} md:size={22} fill="currentColor" />
+              <ArrowUpCircle size={20} fill="currentColor" />
             </button>
           </div>
           <p className="text-[8px] md:text-[9px] text-center text-slate-600 mt-1.5 font-medium tracking-wide uppercase opacity-40">{t.chat.engineInfo}</p>

@@ -1,8 +1,8 @@
 
 import React from 'react';
 import { ArrowRight, Sparkles, Bot, Zap, Smartphone, Download } from 'lucide-react';
-import { UserSettings } from '../types';
-import { translations, Language } from '../translations';
+import { UserSettings } from '../types.ts';
+import { translations, Language } from '../translations.ts';
 
 interface HomeProps {
   onStart: () => void;
@@ -11,7 +11,7 @@ interface HomeProps {
 }
 
 const Home: React.FC<HomeProps> = ({ onStart, avatar, settings }) => {
-  const t = translations[settings.language as Language] || translations.French;
+  const t = translations[settings.language as Language] || translations.English;
 
   return (
     <div className="flex flex-col items-center justify-center min-h-full py-6 md:py-12 text-center animate-in fade-in duration-700">
