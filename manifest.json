@@ -2,22 +2,33 @@
 {
   "short_name": "Stacy AI",
   "name": "Stacy AI - Personal Assistant",
+  "description": "Next-gen AI assistant with native integration capabilities.",
   "icons": [
     {
       "src": "https://files.catbox.moe/don5ye.jpg",
       "sizes": "192x192",
       "type": "image/jpg",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "https://files.catbox.moe/don5ye.jpg",
+      "sizes": "192x192",
+      "type": "image/jpg",
+      "purpose": "maskable"
     },
     {
       "src": "https://files.catbox.moe/don5ye.jpg",
       "sizes": "512x512",
-      "type": "image/jpg"
+      "type": "image/jpg",
+      "purpose": "any"
     }
   ],
-  "start_url": ".",
+  "start_url": "./index.html",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "minimal-ui"],
   "theme_color": "#0f172a",
   "background_color": "#0f172a",
-  "orientation": "portrait"
+  "orientation": "portrait",
+  "prefer_related_applications": false,
+  "categories": ["productivity", "utilities", "ai"]
 }

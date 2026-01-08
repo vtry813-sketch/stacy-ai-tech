@@ -25,14 +25,16 @@ import {
   Loader2,
   ChevronRight,
   Eye,
-  EyeOff
+  EyeOff,
+  Cpu,
+  Globe
 } from 'lucide-react';
 
 interface DashboardProps {
   settings: UserSettings;
   generateKey: () => string;
   sessionsCount: number;
-  installApp?: () => void;
+  installApp: () => void;
   canInstall?: boolean;
   onConsume?: () => void;
 }
@@ -87,40 +89,23 @@ const Dashboard: React.FC<DashboardProps> = ({ settings, generateKey, sessionsCo
     const key = (settings.apiKey && showKey) ? settings.apiKey : 'YOUR_STACY_KEY';
     switch (activeTab) {
       case 'js':
-        return `// JavaScript / Node.js
-const response = await fetch('https://api.stacy.ai/v1/chat', {
+        return `// Stacy AI SDK - JS
+const res = await fetch('https://api.stacy.ai/v1/chat', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    key: '${key}',
-    message: 'Hello Stacy!',
-    stream: false
-  })
-});
-
-const data = await response.json();
-console.log(data.content);`;
+  body: JSON.stringify({ key: '${key}', message: 'Hello!' })
+});`;
       case 'python':
-        return `# Python Implementation
+        return `# Stacy AI Python
 import requests
-
-url = "https://api.stacy.ai/v1/chat"
-payload = {
+res = requests.post("https://api.stacy.ai/v1/chat", json={
     "key": "${key}",
-    "message": "Hello Stacy!",
-    "temperature": 0.7
-}
-
-response = requests.post(url, json=payload)
-print(response.json()['content'])`;
+    "message": "Hi Stacy!"
+})`;
       case 'curl':
         return `curl -X POST https://api.stacy.ai/v1/chat \\
 -H "Content-Type: application/json" \\
--d '{
-  "key": "${key}",
-  "message": "Hello Stacy!",
-  "stream": true
-}'`;
+-d '{"key": "${key}", "message": "Hi!"}'`;
     }
   };
 
@@ -137,22 +122,12 @@ print(response.json()['content'])`;
             </div>
             <h3 className="text-xl font-bold text-center mb-4">Regenerate API Key?</h3>
             <p className="text-slate-400 text-sm text-center mb-8 leading-relaxed">
-              Are you sure you want to regenerate your API key? This action is irreversible and will invalidate your current key.
+              Are you sure? This will immediately invalidate your old key and break existing integrations.
             </p>
             <div className="flex gap-3">
-              <button 
-                disabled={isRegenerating}
-                onClick={() => setShowRegenConfirm(false)}
-                className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 rounded-2xl text-sm font-bold transition-all disabled:opacity-50"
-              >
-                Cancel
-              </button>
-              <button 
-                disabled={isRegenerating}
-                onClick={confirmRegen}
-                className="flex-1 py-3 bg-indigo-600 hover:bg-indigo-500 rounded-2xl text-sm font-bold transition-all shadow-lg shadow-indigo-600/20 flex items-center justify-center gap-2"
-              >
-                {isRegenerating ? <Loader2 size={18} className="animate-spin" /> : 'Regenerate'}
+              <button onClick={() => setShowRegenConfirm(false)} className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 rounded-2xl text-sm font-bold transition-all">Cancel</button>
+              <button onClick={confirmRegen} className="flex-1 py-3 bg-indigo-600 hover:bg-indigo-500 rounded-2xl text-sm font-bold transition-all shadow-lg flex items-center justify-center gap-2">
+                {isRegenerating ? <Loader2 size={18} className="animate-spin" /> : 'Confirm'}
               </button>
             </div>
           </div>
@@ -170,7 +145,74 @@ print(response.json()['content'])`;
         </div>
       </header>
 
-      {/* Grid Stats & Quota UI */}
+      {/* APK DEPLOYMENT SECTION - NOUVEAU LOOK */}
+      <section className="relative overflow-hidden group">
+        <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-[2.5rem] blur opacity-15 group-hover:opacity-25 transition-opacity"></div>
+        <div className="relative glass-panel rounded-[2.5rem] border-indigo-500/20 bg-indigo-950/20 shadow-2xl overflow-hidden">
+          <div className="p-8 md:p-10 flex flex-col lg:flex-row items-center gap-10">
+            <div className="flex-1 space-y-6">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-indigo-500/20 rounded-2xl border border-indigo-500/30 text-indigo-400">
+                  <Smartphone size={28} />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-white">{t.dashboard.androidTitle}</h2>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                    <p className="text-[10px] font-black text-green-400 uppercase tracking-tighter">WebAPK Generator v2.0 Ready</p>
+                  </div>
+                </div>
+              </div>
+              
+              <p className="text-slate-400 leading-relaxed max-w-md">
+                Stacy AI peut être installée comme une **application native APK** sur votre appareil Android. 
+                Cela permet une expérience plein écran, sans barre d'adresse, et un accès instantané depuis votre tiroir d'applications.
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                <div className="flex items-center gap-3 p-3 bg-white/5 rounded-2xl border border-white/5">
+                  <Cpu size={16} className="text-indigo-400" />
+                  <span className="text-xs font-medium text-slate-300">Poids : ~800 KB</span>
+                </div>
+                <div className="flex items-center gap-3 p-3 bg-white/5 rounded-2xl border border-white/5">
+                  <Globe size={16} className="text-purple-400" />
+                  <span className="text-xs font-medium text-slate-300">Mises à jour : Auto</span>
+                </div>
+              </div>
+
+              <button 
+                onClick={installApp}
+                className="w-full sm:w-auto flex items-center justify-center gap-3 px-10 py-5 bg-white text-indigo-900 rounded-[2rem] font-black text-lg transition-all transform hover:scale-105 active:scale-95 shadow-xl hover:shadow-indigo-500/20"
+              >
+                <Download size={22} />
+                {canInstall ? "INSTALLER L'APK" : "GUIDE D'INSTALLATION"}
+              </button>
+            </div>
+
+            <div className="hidden lg:block relative shrink-0">
+               <div className="absolute inset-0 bg-indigo-500/20 blur-3xl rounded-full"></div>
+               <div className="relative w-48 h-96 bg-slate-900 border-[6px] border-slate-800 rounded-[3rem] shadow-2xl overflow-hidden">
+                  <div className="absolute top-0 inset-x-0 h-6 bg-slate-800 flex justify-center items-center">
+                    <div className="w-12 h-1.5 bg-slate-700 rounded-full"></div>
+                  </div>
+                  <div className="mt-8 flex flex-col items-center gap-4 px-4">
+                     <div className="w-16 h-16 rounded-2xl stacy-gradient p-1 shadow-lg">
+                        <img src="https://files.catbox.moe/don5ye.jpg" className="w-full h-full object-cover rounded-xl" />
+                     </div>
+                     <div className="w-full h-2 bg-slate-800 rounded-full"></div>
+                     <div className="w-3/4 h-2 bg-slate-800 rounded-full"></div>
+                     <div className="mt-10 grid grid-cols-2 gap-2 w-full">
+                        <div className="aspect-square bg-slate-800/50 rounded-xl"></div>
+                        <div className="aspect-square bg-indigo-500/20 rounded-xl border border-indigo-500/30"></div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Grid Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <StatCard icon={<MessageSquare size={18} />} label={t.dashboard.stats.conv} value={sessionsCount} color="indigo" />
         
@@ -185,10 +227,7 @@ print(response.json()['content'])`;
               <p className="text-[10px] font-black text-purple-400">{Math.round(usagePercent)}%</p>
             </div>
             <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
-               <div 
-                 className={`h-full transition-all duration-1000 ease-out ${usagePercent > 80 ? 'bg-red-500' : 'bg-gradient-to-r from-indigo-500 to-purple-500'}`}
-                 style={{ width: `${usagePercent}%` }}
-               ></div>
+               <div className={`h-full transition-all duration-1000 ease-out ${usagePercent > 80 ? 'bg-red-500' : 'bg-gradient-to-r from-indigo-500 to-purple-500'}`} style={{ width: `${usagePercent}%` }}></div>
             </div>
           </div>
         </div>
@@ -203,6 +242,7 @@ print(response.json()['content'])`;
             <Key size={20} className="text-indigo-400" />
             <h2 className="text-lg font-bold">{t.dashboard.api.title}</h2>
           </div>
+          {regenSuccess && <div className="text-green-400 text-[10px] font-bold animate-pulse uppercase">Clé mise à jour !</div>}
         </div>
         
         <div className="p-6 space-y-6">
@@ -210,72 +250,52 @@ print(response.json()['content'])`;
             <div className={`flex-1 border rounded-2xl px-5 py-3 font-mono text-sm flex items-center justify-between min-h-[52px] transition-all overflow-hidden ${
               settings.apiKey ? 'bg-black/40 border-indigo-500/30 text-indigo-300' : 'bg-slate-900/50 border-slate-800 text-slate-600'
             }`}>
-              <span className="truncate">
-                {getMaskedKey(settings.apiKey)}
-              </span>
+              <span className="truncate">{getMaskedKey(settings.apiKey)}</span>
               {settings.apiKey && (
-                <button 
-                  onClick={() => setShowKey(!showKey)}
-                  className="ml-2 p-1.5 text-slate-500 hover:text-indigo-400 transition-colors shrink-0"
-                >
+                <button onClick={() => setShowKey(!showKey)} className="ml-2 p-1.5 text-slate-500 hover:text-indigo-400 transition-colors shrink-0">
                   {showKey ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               )}
             </div>
             <div className="flex gap-2">
-              <button 
-                onClick={() => handleCopy(settings.apiKey || '', setCopied)}
-                disabled={!settings.apiKey}
-                className="p-3.5 glass-panel rounded-2xl hover:bg-slate-800 transition-all disabled:opacity-50 text-slate-300"
-              >
+              <button onClick={() => handleCopy(settings.apiKey || '', setCopied)} disabled={!settings.apiKey} className="p-3.5 glass-panel rounded-2xl hover:bg-slate-800 transition-all disabled:opacity-50 text-slate-300">
                 {copied ? <Check size={20} className="text-green-400" /> : <Copy size={20} />}
               </button>
-              <button 
-                onClick={() => settings.apiKey ? setShowRegenConfirm(true) : generateKey()}
-                className="px-6 py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl font-bold text-sm transition-all shadow-lg shadow-indigo-600/20 active:scale-95"
-              >
+              <button onClick={() => settings.apiKey ? setShowRegenConfirm(true) : generateKey()} className="px-6 py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl font-bold text-sm transition-all shadow-lg active:scale-95">
                 {settings.apiKey ? t.dashboard.api.regenerate : t.dashboard.api.activate}
               </button>
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* Quick Documentation */}
-      <section className="glass-panel rounded-3xl overflow-hidden border-slate-800 bg-slate-900/20">
-        <div className="p-6 border-b border-white/5 flex items-center gap-3">
-          <BookOpen size={20} className="text-purple-400" />
-          <h2 className="text-lg font-bold">{t.dashboard.api.docs}</h2>
-        </div>
-        <div className="p-6 space-y-4">
-          <div className="flex items-center gap-2">
-            <TabButton active={activeTab === 'js'} onClick={() => setActiveTab('js')} label="JavaScript" />
-            <TabButton active={activeTab === 'python'} onClick={() => setActiveTab('python')} label="Python" />
-            <TabButton active={activeTab === 'curl'} onClick={() => setActiveTab('curl')} label="cURL" />
-          </div>
-          <div className="bg-[#0b0e14] rounded-2xl border border-white/5 overflow-hidden font-mono text-xs shadow-2xl p-5">
-            <pre className="text-indigo-200/90 leading-relaxed overflow-x-auto">
-              {getCodeSnippet()}
-            </pre>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <div className="p-4 bg-indigo-500/5 border border-indigo-500/10 rounded-2xl flex items-start gap-3">
+                <Info size={16} className="text-indigo-400 shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-[11px] text-indigo-300 font-bold leading-relaxed">{t.dashboard.api.note}</p>
+                </div>
+              </div>
+              
+              <button onClick={handleSimulateCall} disabled={!settings.apiKey || creditsRemaining <= 0 || simulating} className="w-full flex items-center justify-center gap-2 py-3 bg-white/5 border border-white/10 hover:bg-white/10 rounded-xl text-xs font-bold transition-all active:scale-95">
+                {simulating ? <Loader2 size={14} className="animate-spin text-indigo-500" /> : <Play size={14} />}
+                {t.dashboard.api.simulate}
+              </button>
+            </div>
+
+            <div className="bg-black/60 rounded-2xl border border-slate-800 overflow-hidden font-mono text-[10px]">
+              <div className="bg-slate-800/50 px-4 py-2 border-b border-white/5 text-slate-400">Endpoint : v1/chat</div>
+              <div className="p-4 text-slate-300 space-y-2">
+                <div className="bg-slate-900/50 p-3 rounded-lg border border-white/5 overflow-x-auto">
+                  <pre className="text-indigo-300/80">{getCodeSnippet()}</pre>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
     </div>
   );
 };
-
-const TabButton: React.FC<{ active: boolean; onClick: () => void; label: string }> = ({ active, onClick, label }) => (
-  <button 
-    onClick={onClick}
-    className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap border ${
-      active 
-        ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-600/20' 
-        : 'bg-slate-800/40 border-slate-700/50 text-slate-500 hover:text-slate-300'
-    }`}
-  >
-    {label}
-  </button>
-);
 
 const StatCard: React.FC<{ icon: React.ReactNode; label: string; value: any; color: string }> = ({ icon, label, value, color }) => (
   <div className="glass-panel p-5 rounded-2xl border-slate-800 shadow-sm flex items-center justify-between">
@@ -285,24 +305,6 @@ const StatCard: React.FC<{ icon: React.ReactNode; label: string; value: any; col
     </div>
     <div className={`p-2.5 rounded-xl ${color === 'indigo' ? 'bg-indigo-500/10 text-indigo-400' : 'bg-blue-500/10 text-blue-400'}`}>
       {icon}
-    </div>
-  </div>
-);
-
-const StepCard: React.FC<{ number: string; title: string; description: string }> = ({ number, title, description }) => (
-  <div className="flex flex-col gap-2 p-4 rounded-2xl bg-white/5 border border-white/5">
-    <span className="text-xs font-black text-indigo-500/50">{number}</span>
-    <h4 className="font-bold text-slate-100">{title}</h4>
-    <p className="text-[11px] text-slate-500 leading-snug">{description}</p>
-  </div>
-);
-
-const DocFeatureItem: React.FC<{ icon: React.ReactNode; title: string; description: string }> = ({ icon, title, description }) => (
-  <div className="flex gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-white/10 transition-colors">
-    <div className="shrink-0">{icon}</div>
-    <div>
-      <h3 className="text-sm font-bold text-slate-100 flex items-center gap-2">{title}</h3>
-      <p className="text-[11px] text-slate-400 mt-1 leading-snug">{description}</p>
     </div>
   </div>
 );
