@@ -6,6 +6,7 @@ import Home from './components/Home.tsx';
 import ChatView from './components/ChatView.tsx';
 import Dashboard from './components/Dashboard.tsx';
 import Settings from './components/Settings.tsx';
+import DocumentationView from './components/DocumentationView.tsx';
 import { Menu, X, Moon, Sun } from 'lucide-react';
 import { translations, Language } from './translations.ts';
 
@@ -122,9 +123,11 @@ const App: React.FC = () => {
         const activeSession = sessions.find(s => s.id === activeSessionId);
         return <ChatView session={activeSession} settings={settings} updateMessages={(msgs) => activeSessionId && setSessions(prev => prev.map(s => s.id === activeSessionId ? {...s, messages: msgs, updatedAt: Date.now()} : s))} avatar={STACY_AVATAR} onConsume={consumeCredit} />;
       case Page.Dashboard:
-        return <div className="flex-1 overflow-y-auto px-4 md:px-8 py-6 scrollbar-thin"><Dashboard settings={settings} generateKey={generateApiKey} sessionsCount={sessions.length} onConsume={consumeCredit} /></div>;
+        return <div className="flex-1 overflow-y-auto px-4 md:px-8 py-6 scrollbar-thin"><Dashboard settings={settings} generateKey={generateApiKey} sessionsCount={sessions.length} onConsume={consumeCredit} setPage={setCurrentPage} /></div>;
       case Page.Settings:
         return <div className="flex-1 overflow-y-auto px-4 md:px-8 py-6 scrollbar-thin"><Settings settings={settings} onUpdate={setSettings} onClearHistory={clearAllHistory} /></div>;
+      case Page.Documentation:
+        return <div className="flex-1 overflow-y-auto px-4 md:px-8 py-6 scrollbar-thin"><DocumentationView settings={settings} setPage={setCurrentPage} /></div>;
       default:
         return <div className="flex-1 overflow-y-auto px-4 md:px-8 py-6 md:py-12 scrollbar-thin"><Home onStart={createNewChat} avatar={STACY_AVATAR} settings={settings} /></div>;
     }
@@ -132,23 +135,24 @@ const App: React.FC = () => {
 
   return (
     <div className={`flex h-screen overflow-hidden transition-colors duration-300 ${settings.theme === 'light' ? 'bg-slate-50 text-slate-900' : 'bg-indigo-950 text-slate-100'}`}>
-      <div className={`fixed inset-0 bg-black/50 z-40 backdrop-blur-sm transition-opacity duration-300 lg:hidden ${isSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setIsSidebarOpen(false)} />
+      <div className={`fixed inset-0 bg-black/50 z-[60] backdrop-blur-sm transition-opacity duration-300 lg:hidden ${isSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setIsSidebarOpen(false)} />
       
-      <div className={`fixed lg:relative z-50 h-full transition-transform duration-300 ease-out lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0 w-[280px]' : '-translate-x-full lg:w-0 lg:opacity-0 overflow-hidden'}`}>
+      <div className={`fixed lg:relative z-[70] h-full transition-transform duration-300 ease-out lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0 w-[280px]' : '-translate-x-full lg:w-0 lg:opacity-0 overflow-hidden'}`}>
         <Sidebar sessions={sessions} activeId={activeSessionId} onSelect={selectSession} onNew={createNewChat} onDelete={deleteSession} currentPage={currentPage} setPage={setCurrentPage} avatar={STACY_AVATAR} settings={settings} />
       </div>
 
-      <main className="flex-1 relative flex flex-col h-full overflow-hidden">
-        <div className="flex items-center justify-between px-4 h-16 shrink-0 lg:hidden bg-white/5 backdrop-blur-md border-b border-white/10">
-          <button onClick={() => setIsSidebarOpen(true)} className="p-2 glass-panel rounded-xl shadow-lg border-indigo-500/10 active:scale-95 transition-transform"><Menu size={20} /></button>
+      <main className="flex-1 relative flex flex-col h-full overflow-hidden z-10">
+        {/* Fixed Header for Mobile */}
+        <div className="flex items-center justify-between px-4 h-16 shrink-0 lg:hidden bg-slate-900/40 backdrop-blur-md border-b border-white/5 sticky top-0 z-50">
+          <button onClick={() => setIsSidebarOpen(true)} className="p-2.5 glass-panel rounded-xl shadow-lg border-indigo-500/10 active:scale-95 transition-transform"><Menu size={20} /></button>
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg overflow-hidden stacy-gradient p-0.5"><img src={STACY_AVATAR} className="w-full h-full object-cover rounded-[6px]" /></div>
-            <span className="font-bold tracking-tight">Stacy AI</span>
+            <div className="w-8 h-8 rounded-lg overflow-hidden stacy-gradient p-0.5 shadow-lg"><img src={STACY_AVATAR} className="w-full h-full object-cover rounded-[6px]" /></div>
+            <span className="font-bold tracking-tight text-slate-200">Stacy AI</span>
           </div>
-          <button onClick={toggleTheme} className="p-2 glass-panel rounded-xl shadow-lg border-indigo-500/10 active:scale-95 transition-transform">{settings.theme === 'dark' ? <Sun size={20} className="text-yellow-400" /> : <Moon size={20} className="text-indigo-600" />}</button>
+          <button onClick={toggleTheme} className="p-2.5 glass-panel rounded-xl shadow-lg border-indigo-500/10 active:scale-95 transition-transform">{settings.theme === 'dark' ? <Sun size={20} className="text-yellow-400" /> : <Moon size={20} className="text-indigo-600" />}</button>
         </div>
 
-        <button onClick={toggleTheme} className="hidden lg:flex fixed top-4 right-4 z-50 p-2.5 glass-panel rounded-xl shadow-lg border-indigo-500/10 hover:scale-110 active:scale-95 transition-all">{settings.theme === 'dark' ? <Sun size={20} className="text-yellow-400" /> : <Moon size={20} className="text-indigo-600" />}</button>
+        <button onClick={toggleTheme} className="hidden lg:flex fixed top-4 right-4 z-[100] p-2.5 glass-panel rounded-xl shadow-lg border-indigo-500/10 hover:scale-110 active:scale-95 transition-all">{settings.theme === 'dark' ? <Sun size={20} className="text-yellow-400" /> : <Moon size={20} className="text-indigo-600" />}</button>
 
         {renderPage()}
       </main>

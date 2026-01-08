@@ -1,5 +1,6 @@
+
 import React, { useState } from 'react';
-import { UserSettings } from '../types.ts';
+import { UserSettings, Page } from '../types.ts';
 import { translations, Language } from '../translations.ts';
 import { 
   Key, 
@@ -10,21 +11,21 @@ import {
   ShieldCheck, 
   Zap,
   BarChart3,
-  Terminal,
   Play,
   AlertTriangle,
   BookOpen,
   Code,
-  ExternalLink,
   Loader2,
   Eye,
   EyeOff,
   Cpu,
+  Layers,
+  Terminal,
   Globe,
-  Sparkles,
-  Command,
-  FileCode,
-  Layers
+  ExternalLink,
+  HelpCircle,
+  FileText,
+  LifeBuoy
 } from 'lucide-react';
 
 interface DashboardProps {
@@ -32,12 +33,12 @@ interface DashboardProps {
   generateKey: () => string;
   sessionsCount: number;
   onConsume?: () => void;
+  setPage: (page: Page) => void;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ settings, generateKey, sessionsCount, onConsume }) => {
+const Dashboard: React.FC<DashboardProps> = ({ settings, generateKey, sessionsCount, onConsume, setPage }) => {
   const t = translations[settings.language as Language] || translations.English;
   const [copied, setCopied] = useState(false);
-  const [simulating, setSimulating] = useState(false);
   const [showRegenConfirm, setShowRegenConfirm] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [regenSuccess, setRegenSuccess] = useState(false);
@@ -45,22 +46,12 @@ const Dashboard: React.FC<DashboardProps> = ({ settings, generateKey, sessionsCo
   const [showKey, setShowKey] = useState(false);
 
   const usagePercent = Math.min((settings.usage / settings.quota) * 100, 100);
-  const creditsRemaining = Math.max(settings.quota - settings.usage, 0);
 
   const handleCopy = (text: string, setter: (val: boolean) => void) => {
     if (!text) return;
     navigator.clipboard.writeText(text);
     setter(true);
     setTimeout(() => setter(false), 2000);
-  };
-
-  const handleSimulateCall = () => {
-    if (!settings.apiKey || creditsRemaining <= 0 || simulating) return;
-    setSimulating(true);
-    setTimeout(() => {
-      onConsume?.();
-      setSimulating(false);
-    }, 800);
   };
 
   const confirmRegen = async () => {
@@ -84,44 +75,36 @@ const Dashboard: React.FC<DashboardProps> = ({ settings, generateKey, sessionsCo
     const key = (settings.apiKey && showKey) ? settings.apiKey : 'YOUR_STACY_KEY';
     switch (activeTab) {
       case 'js':
-        return `// Stacy AI SDK - Node.js/Browser
-import { Stacy } from 'stacy-sdk';
+        return `// Stacy AI SDK - JavaScript
+import { StacyAI } from 'stacy-sdk';
 
-const ai = new Stacy({
+const stacy = new StacyAI({
   apiKey: '${key}',
-  baseUrl: 'https://stacy-ai.vercel.app/api'
+  endpoint: 'https://stacy-ai.vercel.app/api'
 });
 
-const response = await ai.chat({
-  message: 'Hello Stacy!',
-  temperature: ${settings.temperature}
-});
-
+const response = await stacy.chat('Hello!');
 console.log(response.text);`;
       case 'python':
-        return `# Stacy AI Python Integration
+        return `# Stacy AI - Python
 import requests
 
-HEADERS = {
-    "Authorization": "Bearer ${key}",
-    "Content-Type": "application/json"
-}
-
+url = "https://stacy-ai.vercel.app/api/v1/chat"
+headers = { "Authorization": "Bearer ${key}" }
 data = { "message": "Hi Stacy!" }
-res = requests.post("https://stacy-ai.vercel.app/api/v1/chat", 
-                    json=data, headers=HEADERS)
 
+res = requests.post(url, json=data, headers=headers)
 print(res.json()['content'])`;
       case 'curl':
         return `curl -X POST https://stacy-ai.vercel.app/api/v1/chat \\
 -H "Authorization: Bearer ${key}" \\
 -H "Content-Type: application/json" \\
--d '{"message": "Hello from terminal"}'`;
+-d '{"message": "Hello!"}'`;
     }
   };
 
   return (
-    <div className="space-y-8 max-w-5xl mx-auto px-4 py-8 pb-32 animate-in fade-in duration-500">
+    <div className="max-w-4xl mx-auto space-y-6 pb-20 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Confirmation Modal */}
       {showRegenConfirm && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
@@ -131,197 +114,251 @@ print(res.json()['content'])`;
                 <AlertTriangle size={40} />
               </div>
             </div>
-            <h3 className="text-xl font-bold text-center mb-4">{t.dashboard.regenConfirm}</h3>
-            <p className="text-slate-400 text-sm text-center mb-8 leading-relaxed">
-              {t.dashboard.regenWarning}
-            </p>
-            <div className="flex gap-3">
-              <button onClick={() => setShowRegenConfirm(false)} className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 rounded-2xl text-sm font-bold transition-all">{t.dashboard.cancel}</button>
-              <button onClick={confirmRegen} className="flex-1 py-3 bg-indigo-600 hover:bg-indigo-500 rounded-2xl text-sm font-bold transition-all shadow-lg flex items-center justify-center gap-2">
-                {isRegenerating ? <Loader2 size={18} className="animate-spin" /> : t.dashboard.confirm}
+            <h3 className="text-xl font-bold text-center mb-4 text-slate-100">Regenerate Key?</h3>
+            <p className="text-slate-400 text-sm text-center mb-8">This will immediately invalidate your current key.</p>
+            <div className="flex gap-3 mt-6">
+              <button onClick={() => setShowRegenConfirm(false)} className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 rounded-2xl text-sm font-bold transition-all text-slate-300">Cancel</button>
+              <button onClick={confirmRegen} className="flex-1 py-3 bg-indigo-600 hover:bg-indigo-500 rounded-2xl text-sm font-bold transition-all text-white shadow-lg">
+                {isRegenerating ? <Loader2 size={18} className="animate-spin" /> : 'Confirm'}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <header className="flex items-center justify-between px-2">
         <div>
-          <h1 className="text-3xl font-black tracking-tight mb-1 bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-500 uppercase">{t.dashboard.title}</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight mb-1 bg-clip-text text-transparent bg-gradient-to-r from-slate-100 to-slate-400 uppercase">
+            {t.nav.dashboard}
+          </h1>
           <p className="text-slate-400 text-xs">{t.dashboard.subtitle}</p>
         </div>
-        <div className="flex items-center gap-2 px-3 py-1.5 bg-green-500/10 border border-green-500/20 rounded-full">
-          <ShieldCheck size={14} className="text-green-400" />
-          <span className="text-[9px] font-bold text-green-400 uppercase tracking-widest">{t.dashboard.verified}</span>
+        <div className="flex items-center gap-2 px-3 py-1 bg-green-500/10 border border-green-500/20 text-green-400 rounded-full">
+          <ShieldCheck size={12} />
+          <span className="text-[9px] font-bold uppercase tracking-widest">{t.dashboard.verified}</span>
         </div>
       </header>
 
-      {/* DEVELOPER HUB / API DOCUMENTATION */}
-      <section className="relative overflow-hidden group">
-        <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-[2.5rem] blur opacity-15 group-hover:opacity-30 transition-opacity"></div>
-        <div className="relative glass-panel rounded-[2.5rem] border-indigo-500/30 bg-indigo-950/20 shadow-2xl overflow-hidden">
-          <div className="p-8 md:p-12 flex flex-col lg:flex-row items-start gap-10">
-            <div className="flex-1 space-y-8">
-              <div className="flex items-center gap-4">
-                <div className="p-4 bg-indigo-500/20 rounded-[1.5rem] border border-indigo-500/30 text-indigo-400 shadow-xl shadow-indigo-500/10">
-                  <Command size={32} />
-                </div>
-                <div>
-                  <h2 className="text-3xl font-black text-white uppercase tracking-tighter">{t.dashboard.devHub.title}</h2>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></span>
-                    <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">{t.dashboard.devHub.version}</p>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="space-y-6">
-                <div className="space-y-4">
-                  <h3 className="text-lg font-bold text-slate-100 flex items-center gap-2">
-                    <Layers size={18} className="text-indigo-400" />
-                    {t.dashboard.devHub.installTitle}
-                  </h3>
-                  <div className="bg-black/40 rounded-xl p-4 border border-slate-800 font-mono text-xs text-indigo-300 flex items-center justify-between">
-                    <span>{t.dashboard.devHub.npmCommand}</span>
-                    <button onClick={() => handleCopy(t.dashboard.devHub.npmCommand, setCopied)} className="hover:text-white transition-colors">
-                      {copied ? <Check size={14} /> : <Copy size={14} />}
-                    </button>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <h3 className="text-lg font-bold text-slate-100 flex items-center gap-2">
-                    <FileCode size={18} className="text-purple-400" />
-                    {t.dashboard.devHub.stepsTitle}
-                  </h3>
-                  <div className="grid grid-cols-1 gap-3">
-                    <DocStep number="01" title={t.dashboard.devHub.step1.title} desc={t.dashboard.devHub.step1.desc} />
-                    <DocStep number="02" title={t.dashboard.devHub.step2.title} desc={t.dashboard.devHub.step2.desc} />
-                    <DocStep number="03" title={t.dashboard.devHub.step3.title} desc={t.dashboard.devHub.step3.desc} />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="w-full lg:w-[450px] space-y-4 shrink-0">
-               <div className="flex items-center justify-between px-2">
-                 <div className="flex items-center gap-2">
-                   <TabButton active={activeTab === 'js'} onClick={() => setActiveTab('js')} label="Node.js" />
-                   <TabButton active={activeTab === 'python'} onClick={() => setActiveTab('python')} label="Python" />
-                   <TabButton active={activeTab === 'curl'} onClick={() => setActiveTab('curl')} label="cURL" />
-                 </div>
-               </div>
-               <div className="relative bg-[#0b0e14] rounded-3xl border border-slate-800 overflow-hidden font-mono text-xs shadow-2xl">
-                  <div className="flex items-center justify-between px-6 py-3 bg-white/5 border-b border-white/5">
-                    <span className="text-slate-500 font-bold uppercase tracking-widest text-[10px]">example_integration.{activeTab === 'python' ? 'py' : activeTab === 'js' ? 'js' : 'sh'}</span>
-                    <button onClick={() => handleCopy(getCodeSnippet(), setCopied)} className="text-slate-500 hover:text-white transition-colors">
-                      {copied ? <Check size={14} className="text-green-400" /> : <Copy size={14} />}
-                    </button>
-                  </div>
-                  <pre className="p-6 text-indigo-200/90 leading-relaxed overflow-x-auto">
-                    {getCodeSnippet()}
-                  </pre>
-               </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Grid Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <StatCard icon={<MessageSquare size={20} />} label={t.dashboard.stats.conv} value={sessionsCount} color="indigo" />
-        
-        <div className="glass-panel p-6 rounded-[2rem] border-slate-800 shadow-xl flex flex-col justify-between h-full bg-slate-900/30">
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">{t.dashboard.stats.usage}</p>
-            <BarChart3 size={20} className="text-purple-400" />
-          </div>
-          <div className="space-y-3">
-            <div className="flex items-end justify-between">
-              <p className="text-2xl font-black">{settings.usage} <span className="text-xs text-slate-500 font-bold">/ {settings.quota}</span></p>
-              <p className="text-[10px] font-black text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded-full">{Math.round(usagePercent)}%</p>
-            </div>
-            <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
-               <div className={`h-full transition-all duration-1000 ease-out ${usagePercent > 80 ? 'bg-red-500' : 'bg-gradient-to-r from-indigo-500 to-purple-500'}`} style={{ width: `${usagePercent}%` }}></div>
-            </div>
-          </div>
-        </div>
-
-        <StatCard icon={<Activity size={20} />} label={t.dashboard.stats.status} value={t.dashboard.stats.online} color="blue" />
-      </div>
-
-      {/* API Key Panel */}
-      <section className="glass-panel rounded-[2rem] overflow-hidden border-slate-800 bg-slate-900/40 relative shadow-2xl">
-        <div className="p-6 border-b border-white/5 flex items-center justify-between bg-white/5">
-          <div className="flex items-center gap-3">
-            <Key size={22} className="text-indigo-400" />
-            <h2 className="text-lg font-black uppercase tracking-tight">{t.dashboard.api.title}</h2>
-          </div>
-          {regenSuccess && <div className="text-green-400 text-[9px] font-black animate-pulse uppercase tracking-widest">{t.dashboard.api.updated}</div>}
-        </div>
-        
-        <div className="p-6 space-y-6">
-          <div className="flex flex-col sm:flex-row gap-3">
-            <div className={`flex-1 border rounded-2xl px-6 py-4 font-mono text-sm flex items-center justify-between min-h-[64px] transition-all overflow-hidden ${
-              settings.apiKey ? 'bg-black/60 border-indigo-500/30 text-indigo-300' : 'bg-slate-900/50 border-slate-800 text-slate-600'
+      {/* API KEY SECTION */}
+      <DashboardSection 
+        title={t.dashboard.api.title} 
+        description={t.dashboard.api.note}
+        icon={<Key className="text-indigo-400" size={16} />}
+      >
+        <div className="space-y-4">
+          <div className="flex flex-col sm:flex-row gap-2">
+            <div className={`flex-1 border rounded-xl px-4 py-2 font-mono text-sm flex items-center justify-between transition-all ${
+              settings.apiKey ? 'bg-black/40 border-indigo-500/30 text-indigo-300' : 'bg-slate-900/60 border-slate-700/50 text-slate-600'
             }`}>
-              <span className="truncate tracking-widest">{getMaskedKey(settings.apiKey)}</span>
+              <span className="truncate">{getMaskedKey(settings.apiKey)}</span>
               {settings.apiKey && (
-                <button onClick={() => setShowKey(!showKey)} className="ml-2 p-2 text-slate-500 hover:text-indigo-400 transition-colors shrink-0 bg-white/5 rounded-xl">
-                  {showKey ? <EyeOff size={20} /> : <Eye size={20} />}
+                <button onClick={() => setShowKey(!showKey)} className="ml-2 text-slate-500 hover:text-indigo-400 transition-colors">
+                  {showKey ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               )}
             </div>
             <div className="flex gap-2">
-              <button onClick={() => handleCopy(settings.apiKey || '', setCopied)} disabled={!settings.apiKey} className="p-4 glass-panel rounded-2xl hover:bg-slate-800 transition-all disabled:opacity-50 text-slate-300 border-slate-700">
-                {copied ? <Check size={24} className="text-green-400" /> : <Copy size={24} />}
+              <button onClick={() => handleCopy(settings.apiKey || '', setCopied)} disabled={!settings.apiKey} className="p-2.5 glass-panel rounded-xl hover:bg-slate-800 transition-all disabled:opacity-50 border-slate-700/50">
+                {copied ? <Check size={18} className="text-green-400" /> : <Copy size={18} />}
               </button>
-              <button onClick={() => settings.apiKey ? setShowRegenConfirm(true) : generateKey()} className="px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl font-black text-sm transition-all shadow-xl active:scale-95 uppercase tracking-widest">
+              <button 
+                onClick={() => settings.apiKey ? setShowRegenConfirm(true) : generateKey()}
+                className="flex-1 sm:flex-none px-6 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all shadow-md active:scale-95 uppercase tracking-widest"
+              >
                 {settings.apiKey ? t.dashboard.api.regenerate : t.dashboard.api.activate}
               </button>
             </div>
           </div>
           
-          <div className="p-4 bg-indigo-500/5 border border-indigo-500/10 rounded-2xl flex items-center gap-3">
-            <Zap size={16} className="text-indigo-400" />
-            <p className="text-xs text-indigo-200/60 font-medium">{t.dashboard.api.usageTip}</p>
+          <div className="flex items-center gap-2 p-3 bg-indigo-500/5 border border-indigo-500/10 rounded-xl">
+            <Zap size={14} className="text-indigo-400 shrink-0" />
+            <p className="text-[10px] text-indigo-200/60 font-medium">Your API key is private. Using it will consume your message credits.</p>
           </div>
         </div>
-      </section>
+      </DashboardSection>
+
+      {/* DOCUMENTATION LINK SECTION */}
+      <DashboardSection 
+        title={t.dashboard.api.docs} 
+        description="Explore detailed documentation, endpoints, and community resources."
+        icon={<BookOpen className="text-purple-400" size={16} />}
+      >
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <DocLink 
+            icon={<FileText size={16} />} 
+            title={t.docs.apiRef} 
+            desc="Explore all available endpoints and parameters."
+            onClick={() => setPage(Page.Documentation)}
+          />
+          <DocLink 
+            icon={<Terminal size={16} />} 
+            title={t.docs.quickStart} 
+            desc="Get up and running in less than 5 minutes."
+            onClick={() => setPage(Page.Documentation)}
+          />
+          <DocLink 
+            icon={<Cpu size={16} />} 
+            title={t.docs.sdkDocs} 
+            desc="Full documentation for the Stacy Node.js/Python SDK."
+            onClick={() => setPage(Page.Documentation)}
+          />
+          <DocLink 
+            icon={<LifeBuoy size={16} />} 
+            title={t.docs.support} 
+            desc="Join our community for help and integration tips."
+            onClick={() => setPage(Page.Documentation)}
+          />
+        </div>
+      </DashboardSection>
+
+      {/* IMPLEMENTATION GUIDE PREVIEW */}
+      <DashboardSection 
+        title="Implementation Guide" 
+        description="Integrate Stacy AI into your projects with our official SDK."
+        icon={<Code className="text-indigo-400" size={16} />}
+      >
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-3">
+              <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                <Layers size={12} className="text-purple-400" />
+                SDK Installation
+              </h3>
+              <div className="bg-black/40 rounded-xl p-3 border border-slate-800 flex items-center justify-between group">
+                <code className="text-xs text-indigo-300">npm install stacy-sdk</code>
+                <button onClick={() => handleCopy('npm install stacy-sdk', setCopied)} className="text-slate-600 hover:text-white transition-colors">
+                  <Copy size={12} />
+                </button>
+              </div>
+            </div>
+            <div className="space-y-3">
+              <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                <Globe size={12} className="text-blue-400" />
+                Base API URL
+              </h3>
+              <div className="bg-black/40 rounded-xl p-3 border border-slate-800 flex items-center justify-between group">
+                <code className="text-xs text-blue-300">https://stacy-ai.vercel.app/api</code>
+                <button onClick={() => handleCopy('https://stacy-ai.vercel.app/api', setCopied)} className="text-slate-600 hover:text-white transition-colors">
+                  <Copy size={12} />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                <Terminal size={12} className="text-indigo-400" />
+                Code Implementation
+              </h3>
+              <div className="flex gap-2">
+                {['js', 'python', 'curl'].map(tab => (
+                  <button 
+                    key={tab}
+                    onClick={() => setActiveTab(tab as any)}
+                    className={`text-[9px] font-bold uppercase px-2 py-1 rounded transition-all ${activeTab === tab ? 'bg-indigo-600 text-white shadow-md' : 'bg-slate-800 text-slate-500 hover:text-slate-300'}`}
+                  >
+                    {tab}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="bg-[#0b0e14] rounded-xl border border-slate-800 overflow-hidden shadow-2xl">
+              <div className="flex items-center justify-between px-4 py-2 bg-white/5 border-b border-white/5">
+                <span className="text-[9px] font-mono text-slate-500">example.{activeTab === 'curl' ? 'sh' : activeTab}</span>
+                <button onClick={() => handleCopy(getCodeSnippet(), setCopied)} className="text-slate-600 hover:text-white transition-colors">
+                  <Copy size={12} />
+                </button>
+              </div>
+              <pre className="p-4 text-[11px] text-indigo-200/80 font-mono leading-relaxed overflow-x-auto scrollbar-thin">
+                {getCodeSnippet()}
+              </pre>
+            </div>
+          </div>
+        </div>
+      </DashboardSection>
+
+      {/* STATS SECTION */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <StatCard 
+          icon={<MessageSquare size={16} />} 
+          label={t.dashboard.stats.conv} 
+          value={sessionsCount} 
+          color="indigo" 
+        />
+        <StatCard 
+          icon={<Activity size={16} />} 
+          label={t.dashboard.stats.status} 
+          value={t.dashboard.stats.online} 
+          color="green" 
+        />
+        <div className="glass-panel p-5 rounded-2xl border-slate-800/40 bg-slate-900/30 flex flex-col justify-between shadow-sm">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{t.dashboard.stats.usage}</p>
+            <BarChart3 size={16} className="text-purple-400" />
+          </div>
+          <div className="space-y-2">
+            <div className="flex items-end justify-between">
+              <p className="text-xl font-bold text-slate-100">{settings.usage} <span className="text-[10px] text-slate-500">/ {settings.quota}</span></p>
+              <p className="text-[9px] font-bold text-purple-400">{Math.round(usagePercent)}%</p>
+            </div>
+            <div className="w-full h-1 bg-slate-800 rounded-full overflow-hidden">
+              <div 
+                className={`h-full transition-all duration-1000 ease-out ${usagePercent > 80 ? 'bg-red-500' : 'bg-gradient-to-r from-indigo-500 to-purple-500'}`} 
+                style={{ width: `${usagePercent}%` }}
+              ></div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
 
-const TabButton: React.FC<{ active: boolean; onClick: () => void; label: string }> = ({ active, onClick, label }) => (
+const DashboardSection: React.FC<{ title: string; description: string; icon: React.ReactNode; children: React.ReactNode }> = ({ title, description, icon, children }) => (
+  <section className="glass-panel p-5 rounded-2xl border-slate-800/40 bg-slate-900/30 shadow-sm transition-all hover:bg-slate-900/40">
+    <div className="flex gap-3 mb-4">
+      <div className="p-2 bg-slate-800/50 rounded-xl border border-slate-700/50 shrink-0 h-fit">
+        {icon}
+      </div>
+      <div>
+        <h2 className="text-sm font-bold text-slate-100">{title}</h2>
+        <p className="text-[10px] text-slate-500 font-medium">{description}</p>
+      </div>
+    </div>
+    {children}
+  </section>
+);
+
+const DocLink: React.FC<{ icon: React.ReactNode; title: string; desc: string; onClick: () => void }> = ({ icon, title, desc, onClick }) => (
   <button 
     onClick={onClick}
-    className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${
-      active 
-        ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-600/20' 
-        : 'bg-slate-800/40 border-slate-700/50 text-slate-500 hover:text-slate-300'
-    }`}
+    className="flex items-start gap-3 p-3 bg-slate-800/20 border border-slate-700/30 rounded-xl hover:bg-slate-800/40 hover:border-indigo-500/30 transition-all group text-left w-full"
   >
-    {label}
+    <div className="p-2 bg-slate-800/50 rounded-lg text-slate-500 group-hover:text-indigo-400 transition-colors">
+      {icon}
+    </div>
+    <div className="flex-1 overflow-hidden">
+      <div className="flex items-center justify-between">
+        <h4 className="text-xs font-bold text-slate-200 group-hover:text-white">{title}</h4>
+        <ExternalLink size={10} className="text-slate-600 opacity-0 group-hover:opacity-100 transition-all shrink-0" />
+      </div>
+      <p className="text-[10px] text-slate-500 truncate mt-0.5">{desc}</p>
+    </div>
   </button>
 );
 
-const DocStep: React.FC<{ number: string; title: string; desc: string }> = ({ number, title, desc }) => (
-  <div className="flex items-center gap-4 p-4 bg-white/5 border border-white/5 rounded-2xl hover:bg-white/10 transition-colors">
-    <span className="text-xl font-black text-indigo-500/20">{number}</span>
-    <div>
-      <h4 className="text-xs font-black text-slate-200 uppercase tracking-widest">{title}</h4>
-      <p className="text-[11px] text-slate-500 font-medium">{desc}</p>
-    </div>
-  </div>
-);
-
 const StatCard: React.FC<{ icon: React.ReactNode; label: string; value: any; color: string }> = ({ icon, label, value, color }) => (
-  <div className="glass-panel p-6 rounded-[2rem] border-slate-800 shadow-xl flex items-center justify-between bg-slate-900/30">
+  <div className="glass-panel p-5 rounded-2xl border-slate-800/40 bg-slate-900/30 flex items-center justify-between shadow-sm">
     <div>
-      <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">{label}</p>
-      <p className="text-2xl font-black mt-1 uppercase">{value}</p>
+      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{label}</p>
+      <p className="text-xl font-bold mt-1 text-slate-100">{value}</p>
     </div>
-    <div className={`p-3.5 rounded-2xl ${color === 'indigo' ? 'bg-indigo-500/10 text-indigo-400' : 'bg-blue-500/10 text-blue-400'}`}>
+    <div className={`p-2.5 rounded-xl ${
+      color === 'indigo' ? 'bg-indigo-500/10 text-indigo-400' : 
+      color === 'green' ? 'bg-green-500/10 text-green-400' : 
+      'bg-slate-800 text-slate-400'
+    }`}>
       {icon}
     </div>
   </div>

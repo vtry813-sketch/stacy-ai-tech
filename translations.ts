@@ -13,6 +13,7 @@ export const translations = {
       proUser: "Utilisateur Pro",
       searchPlaceholder: "Rechercher...",
       noResults: "Aucun résultat trouvé",
+      docs: "Documentation",
     },
     home: {
       title: "Je suis",
@@ -81,6 +82,15 @@ export const translations = {
         method: "Méthode",
       }
     },
+    docs: {
+      title: "Centre de Documentation",
+      subtitle: "Tout ce dont vous avez besoin pour intégrer Stacy AI.",
+      apiRef: "Référence API",
+      quickStart: "Démarrage Rapide",
+      sdkDocs: "Documentation SDK",
+      support: "Support Communauté",
+      back: "Retour au Dashboard"
+    },
     settings: {
       title: "Configuration",
       subtitle: "Gérez votre identité et vos préférences neurales Stacy.",
@@ -120,6 +130,7 @@ export const translations = {
       proUser: "Pro User",
       searchPlaceholder: "Search chats...",
       noResults: "No results found",
+      docs: "Documentation",
     },
     home: {
       title: "I am",
@@ -188,6 +199,15 @@ export const translations = {
         method: "Method",
       }
     },
+    docs: {
+      title: "Documentation Center",
+      subtitle: "Everything you need to integrate Stacy AI.",
+      apiRef: "API Reference",
+      quickStart: "Quick Start",
+      sdkDocs: "SDK Documentation",
+      support: "Community Support",
+      back: "Back to Dashboard"
+    },
     settings: {
       title: "Settings",
       subtitle: "Manage your identity and Stacy neural preferences.",
@@ -227,6 +247,7 @@ export const translations = {
       proUser: "Usuario Pro",
       searchPlaceholder: "Buscar chats...",
       noResults: "No se encontraron resultados",
+      docs: "Documentación",
     },
     home: {
       title: "Soy",
@@ -274,7 +295,7 @@ export const translations = {
       step3: "Desplegar",
       step3Desc: "Lanza tu aplicación impulsada por Stacy.",
       stats: {
-        conv: "Conversaciones",
+        conv: "Conversations",
         speed: "Velocidad",
         speedVal: "Ultra",
         status: "Estado",
@@ -295,10 +316,19 @@ export const translations = {
         method: "Método",
       }
     },
+    docs: {
+      title: "Centro de Documentación",
+      subtitle: "Todo lo que necesitas para integrar Stacy AI.",
+      apiRef: "Referencia API",
+      quickStart: "Inicio Rápido",
+      sdkDocs: "Docs SDK",
+      support: "Soporte Comunidad",
+      back: "Volver al Dashboard"
+    },
     settings: {
       title: "Ajustes",
       subtitle: "Gestiona tu identidad y las preferencias neuronales de Stacy.",
-      applied: "Aplicado",
+      applied: "Applied",
       identity: "Identidad e Idioma",
       identityDesc: "Configuración básica para tu perfil de usuario.",
       userName: "Nombre para mostrar",
@@ -334,6 +364,7 @@ export const translations = {
       proUser: "Pro-Benutzer",
       searchPlaceholder: "Chats durchsuchen...",
       noResults: "Keine Ergebnisse gefunden",
+      docs: "Dokumentation",
     },
     home: {
       title: "Ich bin",
@@ -399,8 +430,17 @@ export const translations = {
         note: "Dieser Key integriert Stacy in eigene Apps.",
         docs: "Kurzdokumentation",
         endpoint: "Endpoint",
-        method: "Methode",
+        method: "Méthode",
       }
+    },
+    docs: {
+      title: "Dokumentationszentrum",
+      subtitle: "Alles was Sie zur Integration von Stacy AI benötigen.",
+      apiRef: "API Referenz",
+      quickStart: "Schnellstart",
+      sdkDocs: "SDK Dokus",
+      support: "Support Community",
+      back: "Zurück zum Dashboard"
     },
     settings: {
       title: "Einstellungen",

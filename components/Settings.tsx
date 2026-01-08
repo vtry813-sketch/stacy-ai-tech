@@ -14,7 +14,9 @@ import {
   Trash2, 
   CheckCircle2, 
   Info,
-  Globe
+  Globe,
+  AlertCircle,
+  X
 } from 'lucide-react';
 
 interface SettingsProps {
@@ -26,9 +28,24 @@ interface SettingsProps {
 const Settings: React.FC<SettingsProps> = ({ settings, onUpdate, onClearHistory }) => {
   const t = translations[settings.language as Language] || translations.French;
   const [showSuccess, setShowSuccess] = useState(false);
+  const [pendingLanguage, setPendingLanguage] = useState<string | null>(null);
 
   const handleChange = (field: keyof UserSettings, value: any) => {
     onUpdate({ ...settings, [field]: value });
+  };
+
+  const handleLanguageChangeClick = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newLang = e.target.value;
+    if (newLang !== settings.language) {
+      setPendingLanguage(newLang);
+    }
+  };
+
+  const confirmLanguageChange = () => {
+    if (pendingLanguage) {
+      handleChange('language', pendingLanguage);
+      setPendingLanguage(null);
+    }
   };
 
   const handleSave = () => {
@@ -38,6 +55,42 @@ const Settings: React.FC<SettingsProps> = ({ settings, onUpdate, onClearHistory 
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 pb-20 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      {/* Language Confirmation Modal */}
+      {pendingLanguage && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="bg-slate-900 border border-slate-800 p-8 rounded-[2.5rem] max-w-sm w-full shadow-2xl relative overflow-hidden">
+            <div className="absolute top-4 right-4">
+              <button onClick={() => setPendingLanguage(null)} className="text-slate-500 hover:text-slate-300 transition-colors">
+                <X size={20} />
+              </button>
+            </div>
+            <div className="flex justify-center mb-6">
+              <div className="p-4 bg-indigo-500/10 rounded-full text-indigo-500">
+                <AlertCircle size={40} />
+              </div>
+            </div>
+            <h3 className="text-xl font-bold text-center mb-4 text-slate-100">Change Language?</h3>
+            <p className="text-slate-400 text-sm text-center mb-8 leading-relaxed">
+              Are you sure you want to change Stacy's language? This may affect your current conversation context.
+            </p>
+            <div className="flex gap-3">
+              <button 
+                onClick={() => setPendingLanguage(null)} 
+                className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 rounded-2xl text-sm font-bold transition-all text-slate-300"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={confirmLanguageChange} 
+                className="flex-1 py-3 bg-indigo-600 hover:bg-indigo-500 rounded-2xl text-sm font-bold transition-all text-white shadow-lg shadow-indigo-600/20"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <header className="flex items-center justify-between px-2">
         <div>
           <h1 className="text-3xl font-extrabold tracking-tight mb-1 bg-clip-text text-transparent bg-gradient-to-r from-slate-100 to-slate-400">
@@ -75,7 +128,7 @@ const Settings: React.FC<SettingsProps> = ({ settings, onUpdate, onClearHistory 
               <div className="relative">
                 <select 
                   value={settings.language}
-                  onChange={(e) => handleChange('language', e.target.value)}
+                  onChange={handleLanguageChangeClick}
                   className="w-full bg-slate-900/60 border border-slate-700/50 rounded-xl px-4 py-2 text-sm text-slate-200 outline-none focus:border-indigo-500/50 transition-all shadow-inner appearance-none cursor-pointer"
                 >
                   <option value="French">Français</option>

@@ -3,7 +3,8 @@ export enum Page {
   Home = 'home',
   Chat = 'chat',
   Dashboard = 'dashboard',
-  Settings = 'settings'
+  Settings = 'settings',
+  Documentation = 'documentation'
 }
 
 export interface Message {
