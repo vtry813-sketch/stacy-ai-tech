@@ -1,0 +1,8 @@
+{
+  "name": "Stacy AI",
+  "description": "A powerful, personalized AI assistant with a built-in developer API system for cross-platform integration.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
