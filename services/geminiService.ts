@@ -63,3 +63,36 @@ export const streamStacyResponse = async (
     throw error;
   }
 };
+
+/**
+ * Génère une image en utilisant Gemini 2.5 Flash Image
+ */
+export const generateStacyImage = async (prompt: string) => {
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || "" });
+  
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash-image',
+      contents: { 
+        parts: [{ text: prompt }] 
+      },
+      config: {
+        imageConfig: {
+          aspectRatio: "1:1"
+        }
+      }
+    });
+
+    // Extraction de la première image trouvée dans les parties de la réponse
+    for (const part of response.candidates[0].content.parts) {
+      if (part.inlineData) {
+        return `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
+      }
+    }
+    
+    throw new Error("No image data returned from model");
+  } catch (error) {
+    console.error("Image Generation Error:", error);
+    throw error;
+  }
+};

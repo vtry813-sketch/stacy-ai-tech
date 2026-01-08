@@ -1,8 +1,8 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { ChatSession, Message, UserSettings } from '../types.ts';
-import { User, Sparkles, ArrowUpCircle } from 'lucide-react';
-import { streamStacyResponse } from '../services/geminiService.ts';
+import { User, Sparkles, ArrowUpCircle, Image as ImageIcon, Download, Loader2 } from 'lucide-react';
+import { streamStacyResponse, generateStacyImage } from '../services/geminiService.ts';
 import { translations, Language } from '../translations.ts';
 
 interface ChatViewProps {
@@ -19,7 +19,6 @@ const ChatView: React.FC<ChatViewProps> = ({ session, settings, updateMessages, 
   const [isTyping, setIsTyping] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  // Replacement for scrollIntoView to avoid jumping the whole page layout
   const scrollToBottom = () => {
     if (scrollContainerRef.current) {
       const { scrollHeight, clientHeight } = scrollContainerRef.current;
@@ -34,12 +33,20 @@ const ChatView: React.FC<ChatViewProps> = ({ session, settings, updateMessages, 
     scrollToBottom();
   }, [session?.messages, isTyping]);
 
-  // Initial scroll when session changes
   useEffect(() => {
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
     }
   }, [session?.id]);
+
+  const checkIfImageRequest = (text: string): boolean => {
+    const lowText = text.toLowerCase();
+    return lowText.startsWith('/image') || 
+           lowText.includes('génère une image') || 
+           lowText.includes('dessine') || 
+           lowText.includes('generate image') || 
+           lowText.includes('draw');
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,9 +61,43 @@ const ChatView: React.FC<ChatViewProps> = ({ session, settings, updateMessages, 
 
     const currentMessages = [...session.messages, userMessage];
     updateMessages(currentMessages);
+    const userPrompt = input;
     setInput('');
     setIsTyping(true);
 
+    // Détection de demande d'image
+    if (checkIfImageRequest(userPrompt)) {
+      try {
+        const assistantMessageId = (Date.now() + 1).toString();
+        // Message d'attente
+        const waitingMsg: Message = { 
+          id: assistantMessageId, 
+          role: 'assistant', 
+          content: "🎨 Stacy est en train de créer votre image...", 
+          timestamp: Date.now() 
+        };
+        updateMessages([...currentMessages, waitingMsg]);
+
+        const imageUrl = await generateStacyImage(userPrompt.replace('/image', '').trim());
+        
+        const finalMsg: Message = {
+          id: assistantMessageId,
+          role: 'assistant',
+          content: `![Generated Image](${imageUrl})`,
+          timestamp: Date.now()
+        };
+        updateMessages([...currentMessages, finalMsg]);
+        onConsume();
+      } catch (error) {
+        console.error(error);
+        updateMessages([...currentMessages, { id: Date.now().toString(), role: 'assistant', content: "Désolée, je n'ai pas pu générer cette image.", timestamp: Date.now() }]);
+      } finally {
+        setIsTyping(false);
+      }
+      return;
+    }
+
+    // Traitement texte standard
     const history = session.messages.map(m => ({
       role: (m.role === 'user' ? 'user' : 'model') as 'user' | 'model',
       parts: [{ text: m.content }]
@@ -69,7 +110,7 @@ const ChatView: React.FC<ChatViewProps> = ({ session, settings, updateMessages, 
       updateMessages([...currentMessages, initialAssistantMsg]);
 
       await streamStacyResponse(
-        input,
+        userPrompt,
         history,
         `You are Stacy AI, a world-class personal assistant. You are multilingual and can communicate fluently in any language. Personality: ${settings.personality}. Always respond in the language the user uses. Use Markdown for formatting.`,
         (chunk) => {
@@ -89,16 +130,37 @@ const ChatView: React.FC<ChatViewProps> = ({ session, settings, updateMessages, 
       onConsume();
     } catch (error) {
       console.error(error);
-      const errorMsg: Message = {
-        id: Date.now().toString(),
-        role: 'assistant',
-        content: t.chat.error,
-        timestamp: Date.now()
-      };
-      updateMessages([...currentMessages, errorMsg]);
+      updateMessages([...currentMessages, { id: Date.now().toString(), role: 'assistant', content: t.chat.error, timestamp: Date.now() }]);
     } finally {
       setIsTyping(false);
     }
+  };
+
+  const renderContent = (content: string) => {
+    // Check if content is a markdown image
+    const imgRegex = /!\[.*?\]\((data:image\/.*?;base64,.*?)\)/;
+    const match = content.match(imgRegex);
+
+    if (match && match[1]) {
+      const base64Data = match[1];
+      return (
+        <div className="flex flex-col gap-3">
+          <div className="relative group overflow-hidden rounded-xl border border-white/10 shadow-2xl">
+            <img src={base64Data} className="w-full h-auto max-w-sm rounded-lg" alt="Stacy Generated" />
+            <a 
+              href={base64Data} 
+              download="stacy-gen.png" 
+              className="absolute top-2 right-2 p-2 bg-black/60 backdrop-blur-md rounded-lg text-white opacity-0 group-hover:opacity-100 transition-opacity"
+            >
+              <Download size={16} />
+            </a>
+          </div>
+          <p className="text-[10px] text-slate-500 italic">Image générée par Stacy IA</p>
+        </div>
+      );
+    }
+
+    return <div className="whitespace-pre-wrap break-words">{content}</div>;
   };
 
   if (!session) {
@@ -115,7 +177,6 @@ const ChatView: React.FC<ChatViewProps> = ({ session, settings, updateMessages, 
 
   return (
     <div className="flex flex-col flex-1 min-h-0 w-full max-w-4xl mx-auto overflow-hidden bg-transparent">
-      {/* Messages area - Ref applied here for manual scroll control */}
       <div 
         ref={scrollContainerRef}
         className="flex-1 overflow-y-auto px-3 md:px-6 pt-4 md:pt-6 pb-2 scroll-smooth scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent min-h-0"
@@ -131,10 +192,10 @@ const ChatView: React.FC<ChatViewProps> = ({ session, settings, updateMessages, 
                 <p className="text-sm md:text-base text-slate-400 mt-1 md:mt-2">{t.chat.howHelp}</p>
              </div>
              <div className="grid grid-cols-1 xs:grid-cols-2 gap-3 md:gap-4 w-full max-w-2xl">
-                <QuickPrompt text={t.chat.prompts.story} onClick={() => setInput(t.chat.prompts.story)} />
-                <QuickPrompt text={t.chat.prompts.complex} onClick={() => setInput(t.chat.prompts.complex)} />
-                <QuickPrompt text={t.chat.prompts.code} onClick={() => setInput(t.chat.prompts.code)} />
-                <QuickPrompt text={t.chat.prompts.translate} onClick={() => setInput(t.chat.prompts.translate)} />
+                <QuickPrompt icon={<ImageIcon size={14}/>} text="Génère une image" onClick={() => setInput('/image ')} />
+                <QuickPrompt icon={<Sparkles size={14}/>} text={t.chat.prompts.story} onClick={() => setInput(t.chat.prompts.story)} />
+                <QuickPrompt icon={<User size={14}/>} text={t.chat.prompts.complex} onClick={() => setInput(t.chat.prompts.complex)} />
+                <QuickPrompt icon={<Download size={14}/>} text={t.chat.prompts.code} onClick={() => setInput(t.chat.prompts.code)} />
              </div>
           </div>
         ) : (
@@ -153,15 +214,13 @@ const ChatView: React.FC<ChatViewProps> = ({ session, settings, updateMessages, 
                     ? 'bg-indigo-600 text-white rounded-tr-none' 
                     : 'bg-slate-800/60 border border-slate-700/40 text-slate-100 rounded-tl-none'}
                 `}>
-                  <div className="whitespace-pre-wrap break-words">
-                    {msg.content || (isTyping && msg.role === 'assistant' ? (
-                      <div className="flex items-center gap-2 py-2">
-                        <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-                        <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-                        <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce"></div>
-                      </div>
-                    ) : '')}
-                  </div>
+                  {renderContent(msg.content) || (isTyping && msg.role === 'assistant' ? (
+                    <div className="flex items-center gap-2 py-2">
+                      <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                      <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                      <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce"></div>
+                    </div>
+                  ) : null)}
                 </div>
 
                 {msg.role === 'user' && (
@@ -171,14 +230,12 @@ const ChatView: React.FC<ChatViewProps> = ({ session, settings, updateMessages, 
                 )}
               </div>
             ))}
-            {/* Replaced the div ref for scrolling */}
             <div className="h-4" />
           </div>
         )}
       </div>
 
-      {/* Raised Input area */}
-      <div className="w-full bg-transparent px-3 md:px-6 pt-2 pb-6 md:pb-10 shrink-0">
+      <div className="w-full bg-transparent px-3 md:px-6 pt-2 pb-6 md:pb-10 shrink-0 z-20">
         <form onSubmit={handleSubmit} className="relative max-w-4xl mx-auto group">
           <div className="relative flex items-end gap-2 bg-slate-800/60 backdrop-blur-xl border border-slate-700/80 rounded-2xl md:rounded-[2rem] p-2 md:p-3 shadow-[0_20px_50px_rgba(0,0,0,0.5)] focus-within:border-indigo-500/50 focus-within:bg-slate-800/80 transition-all duration-300">
             <textarea 
@@ -204,7 +261,7 @@ const ChatView: React.FC<ChatViewProps> = ({ session, settings, updateMessages, 
               disabled={!input.trim() || isTyping}
               className={`p-2 md:p-3 rounded-xl md:rounded-2xl transition-all flex items-center justify-center mb-1 shadow-lg ${!input.trim() || isTyping ? 'bg-slate-700/50 text-slate-500 opacity-20 cursor-not-allowed' : 'bg-indigo-600 text-white hover:bg-indigo-500 hover:scale-105 active:scale-95'}`}
             >
-              <ArrowUpCircle size={22} fill="currentColor" />
+              {isTyping ? <Loader2 size={22} className="animate-spin" /> : <ArrowUpCircle size={22} fill="currentColor" />}
             </button>
           </div>
           <p className="text-[9px] text-center text-slate-600 mt-2 font-black tracking-[0.2em] uppercase opacity-30">{t.chat.engineInfo}</p>
@@ -214,15 +271,13 @@ const ChatView: React.FC<ChatViewProps> = ({ session, settings, updateMessages, 
   );
 };
 
-const QuickPrompt: React.FC<{ text: string; onClick: () => void }> = ({ text, onClick }) => (
+const QuickPrompt: React.FC<{ icon: React.ReactNode, text: string; onClick: () => void }> = ({ icon, text, onClick }) => (
   <button 
     onClick={onClick}
-    className="px-3 py-2.5 md:px-4 md:py-3 bg-slate-800/30 border border-slate-700/40 rounded-xl md:rounded-2xl text-left text-[12px] md:text-[13px] text-slate-300 hover:bg-slate-800/60 hover:border-indigo-500/40 transition-all shadow-md group"
+    className="px-3 py-2.5 md:px-4 md:py-3 bg-slate-800/30 border border-slate-700/40 rounded-xl md:rounded-2xl text-left text-[12px] md:text-[13px] text-slate-300 hover:bg-slate-800/60 hover:border-indigo-500/40 transition-all shadow-md group flex items-center gap-2"
   >
-    <div className="flex items-center justify-between gap-2">
-      <span className="truncate font-medium">{text}</span>
-      <Sparkles size={10} className="text-indigo-500/50 group-hover:text-indigo-400 transition-colors shrink-0" />
-    </div>
+    <span className="text-indigo-400 group-hover:scale-110 transition-transform">{icon}</span>
+    <span className="truncate font-medium flex-1">{text}</span>
   </button>
 );
 

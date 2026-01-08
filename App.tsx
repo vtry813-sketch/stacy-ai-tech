@@ -32,7 +32,6 @@ const App: React.FC = () => {
 
   const t = translations[settings.language as Language] || translations.English;
 
-  // Theme & Language logic
   useEffect(() => {
     const root = document.documentElement;
     if (settings.theme === 'dark') root.classList.add('dark');
@@ -44,7 +43,6 @@ const App: React.FC = () => {
     document.documentElement.lang = settings.language === 'French' ? 'fr' : 'en';
   }, [settings.theme, settings.language]);
 
-  // Persistence
   useEffect(() => {
     const savedSessions = localStorage.getItem('stacy_sessions');
     const savedSettings = localStorage.getItem('stacy_settings');
@@ -142,8 +140,8 @@ const App: React.FC = () => {
       </div>
 
       <main className="flex-1 relative flex flex-col h-full overflow-hidden z-10">
-        {/* Mobile Header - Conserved and stabilized */}
-        <header className="flex lg:hidden items-center justify-between px-4 h-16 shrink-0 bg-slate-900/80 backdrop-blur-xl border-b border-white/10 z-[60] sticky top-0">
+        {/* Mobile Header Fix : Sticky and forced top z-index */}
+        <header className="flex lg:hidden items-center justify-between px-4 h-16 shrink-0 bg-slate-900/90 backdrop-blur-2xl border-b border-white/10 z-[100] sticky top-0">
           <button 
             onClick={(e) => {
               e.preventDefault();
@@ -171,7 +169,6 @@ const App: React.FC = () => {
           </button>
         </header>
 
-        {/* Desktop Theme Toggle */}
         <button 
           onClick={toggleTheme} 
           className="hidden lg:flex fixed top-4 right-4 z-[100] p-2.5 glass-panel rounded-xl shadow-lg border-indigo-500/10 hover:scale-110 active:scale-95 transition-all"
@@ -179,7 +176,6 @@ const App: React.FC = () => {
           {settings.theme === 'dark' ? <Sun size={20} className="text-yellow-400" /> : <Moon size={20} className="text-indigo-600" />}
         </button>
 
-        {/* Page content area needs to be strictly constrained */}
         <div className="flex-1 relative flex flex-col min-h-0 overflow-hidden">
           {renderPage()}
         </div>
