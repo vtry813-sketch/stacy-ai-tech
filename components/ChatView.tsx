@@ -17,20 +17,28 @@ const ChatView: React.FC<ChatViewProps> = ({ session, settings, updateMessages, 
   const t = translations[settings.language as Language] || translations.English;
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  const scrollToBottom = (behavior: ScrollBehavior = 'smooth') => {
-    messagesEndRef.current?.scrollIntoView({ behavior });
+  // Replacement for scrollIntoView to avoid jumping the whole page layout
+  const scrollToBottom = () => {
+    if (scrollContainerRef.current) {
+      const { scrollHeight, clientHeight } = scrollContainerRef.current;
+      scrollContainerRef.current.scrollTo({
+        top: scrollHeight - clientHeight,
+        behavior: 'smooth'
+      });
+    }
   };
 
   useEffect(() => {
     scrollToBottom();
   }, [session?.messages, isTyping]);
 
+  // Initial scroll when session changes
   useEffect(() => {
-    const timer = setTimeout(() => scrollToBottom('auto'), 100);
-    return () => clearTimeout(timer);
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
+    }
   }, [session?.id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -107,7 +115,7 @@ const ChatView: React.FC<ChatViewProps> = ({ session, settings, updateMessages, 
 
   return (
     <div className="flex flex-col flex-1 min-h-0 w-full max-w-4xl mx-auto overflow-hidden bg-transparent">
-      {/* Messages area */}
+      {/* Messages area - Ref applied here for manual scroll control */}
       <div 
         ref={scrollContainerRef}
         className="flex-1 overflow-y-auto px-3 md:px-6 pt-4 md:pt-6 pb-2 scroll-smooth scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent min-h-0"
@@ -163,7 +171,8 @@ const ChatView: React.FC<ChatViewProps> = ({ session, settings, updateMessages, 
                 )}
               </div>
             ))}
-            <div ref={messagesEndRef} className="h-4" />
+            {/* Replaced the div ref for scrolling */}
+            <div className="h-4" />
           </div>
         )}
       </div>

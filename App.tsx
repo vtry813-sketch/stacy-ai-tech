@@ -134,18 +134,21 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className={`flex h-screen overflow-hidden transition-colors duration-300 ${settings.theme === 'light' ? 'bg-slate-50 text-slate-900' : 'bg-indigo-950 text-slate-100'}`}>
-      <div className={`fixed inset-0 bg-black/50 z-[80] backdrop-blur-sm transition-opacity duration-300 lg:hidden ${isSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setIsSidebarOpen(false)} />
+    <div className={`flex h-[100dvh] w-full overflow-hidden transition-colors duration-300 ${settings.theme === 'light' ? 'bg-slate-50 text-slate-900' : 'bg-indigo-950 text-slate-100'}`}>
+      <div className={`fixed inset-0 bg-black/50 z-[100] backdrop-blur-sm transition-opacity duration-300 lg:hidden ${isSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setIsSidebarOpen(false)} />
       
-      <div className={`fixed lg:relative z-[90] h-full transition-transform duration-300 ease-out lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0 w-[280px]' : '-translate-x-full lg:w-0 lg:opacity-0 overflow-hidden'}`}>
+      <div className={`fixed lg:relative z-[110] h-full transition-transform duration-300 ease-out lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0 w-[280px]' : '-translate-x-full lg:w-0 lg:opacity-0 overflow-hidden'}`}>
         <Sidebar sessions={sessions} activeId={activeSessionId} onSelect={selectSession} onNew={createNewChat} onDelete={deleteSession} currentPage={currentPage} setPage={setCurrentPage} avatar={STACY_AVATAR} settings={settings} />
       </div>
 
       <main className="flex-1 relative flex flex-col h-full overflow-hidden z-10">
-        {/* Mobile Header - Improved shrink-0 and fixed height to prevent displacement */}
-        <header className="flex lg:hidden items-center justify-between px-4 h-16 shrink-0 bg-slate-900/60 backdrop-blur-xl border-b border-white/10 z-[50]">
+        {/* Mobile Header - Conserved and stabilized */}
+        <header className="flex lg:hidden items-center justify-between px-4 h-16 shrink-0 bg-slate-900/80 backdrop-blur-xl border-b border-white/10 z-[60] sticky top-0">
           <button 
-            onClick={() => setIsSidebarOpen(true)} 
+            onClick={(e) => {
+              e.preventDefault();
+              setIsSidebarOpen(true);
+            }} 
             className="p-2.5 glass-panel rounded-xl shadow-lg border-white/5 active:scale-90 transition-all text-slate-200"
             aria-label="Open menu"
           >
@@ -176,8 +179,10 @@ const App: React.FC = () => {
           {settings.theme === 'dark' ? <Sun size={20} className="text-yellow-400" /> : <Moon size={20} className="text-indigo-600" />}
         </button>
 
-        {/* Current Page Content */}
-        {renderPage()}
+        {/* Page content area needs to be strictly constrained */}
+        <div className="flex-1 relative flex flex-col min-h-0 overflow-hidden">
+          {renderPage()}
+        </div>
       </main>
     </div>
   );
