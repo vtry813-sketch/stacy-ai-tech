@@ -8,10 +8,7 @@ import {
   Check, 
   MessageSquare, 
   Activity, 
-  Smartphone, 
-  Download,
-  Info,
-  ShieldCheck,
+  ShieldCheck, 
   Zap,
   BarChart3,
   Terminal,
@@ -20,27 +17,25 @@ import {
   BookOpen,
   Code,
   ExternalLink,
-  MessageCircle,
-  Hash,
   Loader2,
-  ChevronRight,
   Eye,
   EyeOff,
   Cpu,
   Globe,
-  Sparkles
+  Sparkles,
+  Command,
+  FileCode,
+  Layers
 } from 'lucide-react';
 
 interface DashboardProps {
   settings: UserSettings;
   generateKey: () => string;
   sessionsCount: number;
-  installApp: () => void;
-  canInstall?: boolean;
   onConsume?: () => void;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ settings, generateKey, sessionsCount, installApp, canInstall, onConsume }) => {
+const Dashboard: React.FC<DashboardProps> = ({ settings, generateKey, sessionsCount, onConsume }) => {
   const t = translations[settings.language as Language] || translations.English;
   const [copied, setCopied] = useState(false);
   const [simulating, setSimulating] = useState(false);
@@ -90,23 +85,39 @@ const Dashboard: React.FC<DashboardProps> = ({ settings, generateKey, sessionsCo
     const key = (settings.apiKey && showKey) ? settings.apiKey : 'YOUR_STACY_KEY';
     switch (activeTab) {
       case 'js':
-        return `// Stacy AI SDK - JS
-const res = await fetch('https://api.stacy.ai/v1/chat', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ key: '${key}', message: 'Hello!' })
-});`;
+        return `// Stacy AI SDK - Node.js/Browser
+import { Stacy } from 'stacy-sdk';
+
+const ai = new Stacy({
+  apiKey: '${key}',
+  baseUrl: 'https://stacy-ai.vercel.app/api'
+});
+
+const response = await ai.chat({
+  message: 'Hello Stacy!',
+  temperature: ${settings.temperature}
+});
+
+console.log(response.text);`;
       case 'python':
-        return `# Stacy AI Python
+        return `# Stacy AI Python Integration
 import requests
-res = requests.post("https://api.stacy.ai/v1/chat", json={
-    "key": "${key}",
-    "message": "Hi Stacy!"
-})`;
+
+HEADERS = {
+    "Authorization": "Bearer ${key}",
+    "Content-Type": "application/json"
+}
+
+data = { "message": "Hi Stacy!" }
+res = requests.post("https://stacy-ai.vercel.app/api/v1/chat", 
+                    json=data, headers=HEADERS)
+
+print(res.json()['content'])`;
       case 'curl':
-        return `curl -X POST https://api.stacy.ai/v1/chat \\
+        return `curl -X POST https://stacy-ai.vercel.app/api/v1/chat \\
+-H "Authorization: Bearer ${key}" \\
 -H "Content-Type: application/json" \\
--d '{"key": "${key}", "message": "Hi!"}'`;
+-d '{"message": "Hello from terminal"}'`;
     }
   };
 
@@ -146,71 +157,71 @@ res = requests.post("https://api.stacy.ai/v1/chat", json={
         </div>
       </header>
 
-      {/* APK DEPLOYMENT SECTION - ACTIVELY TRIGGER INSTALL */}
+      {/* DEVELOPER HUB / API DOCUMENTATION */}
       <section className="relative overflow-hidden group">
         <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-[2.5rem] blur opacity-15 group-hover:opacity-30 transition-opacity"></div>
         <div className="relative glass-panel rounded-[2.5rem] border-indigo-500/30 bg-indigo-950/20 shadow-2xl overflow-hidden">
-          <div className="p-8 md:p-12 flex flex-col lg:flex-row items-center gap-10">
+          <div className="p-8 md:p-12 flex flex-col lg:flex-row items-start gap-10">
             <div className="flex-1 space-y-8">
               <div className="flex items-center gap-4">
                 <div className="p-4 bg-indigo-500/20 rounded-[1.5rem] border border-indigo-500/30 text-indigo-400 shadow-xl shadow-indigo-500/10">
-                  <Smartphone size={32} />
+                  <Command size={32} />
                 </div>
                 <div>
-                  <h2 className="text-3xl font-black text-white uppercase tracking-tighter">{t.dashboard.androidTitle}</h2>
+                  <h2 className="text-3xl font-black text-white uppercase tracking-tighter">Developer Integration Hub</h2>
                   <div className="flex items-center gap-2 mt-1">
-                    <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                    <p className="text-[10px] font-black text-green-400 uppercase tracking-widest">Stacy Native APK v2.5 Deployment Ready</p>
+                    <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></span>
+                    <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Stacy API v3.0 REST Interface</p>
                   </div>
                 </div>
               </div>
               
-              <p className="text-slate-300 leading-relaxed text-lg max-w-lg font-medium italic opacity-80">
-                Stacy AI peut être installée comme une **application native APK** sur votre appareil. 
-                Une expérience immersive plein écran, sans latence navigateur, accessible instantanément.
-              </p>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                <div className="flex items-center gap-3 p-4 bg-white/5 rounded-2xl border border-white/10 hover:bg-white/10 transition-colors">
-                  <div className="p-2 bg-indigo-500/20 rounded-lg"><Cpu size={18} className="text-indigo-400" /></div>
-                  <span className="text-xs font-bold text-slate-300 uppercase">Poids Ultra-Léger</span>
+              <div className="space-y-6">
+                <div className="space-y-4">
+                  <h3 className="text-lg font-bold text-slate-100 flex items-center gap-2">
+                    <Layers size={18} className="text-indigo-400" />
+                    How to install the Stacy SDK
+                  </h3>
+                  <div className="bg-black/40 rounded-xl p-4 border border-slate-800 font-mono text-xs text-indigo-300 flex items-center justify-between">
+                    <span>npm install @stacy/sdk --save</span>
+                    <button onClick={() => handleCopy('npm install @stacy/sdk --save', setCopied)} className="hover:text-white transition-colors">
+                      {copied ? <Check size={14} /> : <Copy size={14} />}
+                    </button>
+                  </div>
                 </div>
-                <div className="flex items-center gap-3 p-4 bg-white/5 rounded-2xl border border-white/10 hover:bg-white/10 transition-colors">
-                  <div className="p-2 bg-purple-500/20 rounded-lg"><Zap size={18} className="text-purple-400" /></div>
-                  <span className="text-xs font-bold text-slate-300 uppercase">Boost Performance</span>
+
+                <div className="space-y-4">
+                  <h3 className="text-lg font-bold text-slate-100 flex items-center gap-2">
+                    <FileCode size={18} className="text-purple-400" />
+                    Integration Steps
+                  </h3>
+                  <div className="grid grid-cols-1 gap-3">
+                    <DocStep number="01" title="Generate Key" desc="Get your personal Stacy Neural Key below." />
+                    <DocStep number="02" title="Auth Header" desc="Use 'Authorization: Bearer <KEY>' in your requests." />
+                    <DocStep number="03" title="Base URL" desc="Endpoint: stacy-ai.vercel.app/api/v1/chat" />
+                  </div>
                 </div>
               </div>
-
-              <button 
-                onClick={installApp}
-                className={`w-full sm:w-auto group relative flex items-center justify-center gap-4 px-12 py-6 bg-white text-indigo-950 rounded-[2.5rem] font-black text-xl transition-all transform hover:scale-105 active:scale-95 shadow-[0_20px_40px_rgba(255,255,255,0.1)]`}
-              >
-                <div className="absolute inset-0 rounded-[2.5rem] bg-indigo-500 blur-xl opacity-0 group-hover:opacity-10 transition-opacity"></div>
-                <Download size={26} className="animate-bounce" />
-                <span className="relative">TÉLÉCHARGER L'APK</span>
-                {canInstall && <Sparkles size={18} className="text-indigo-600 animate-pulse" />}
-              </button>
             </div>
 
-            <div className="hidden lg:block relative shrink-0">
-               <div className="absolute inset-0 bg-indigo-500/20 blur-[100px] rounded-full"></div>
-               <div className="relative w-56 h-[450px] bg-slate-900 border-[8px] border-slate-800 rounded-[3.5rem] shadow-2xl overflow-hidden scale-110">
-                  <div className="absolute top-0 inset-x-0 h-8 bg-slate-800 flex justify-center items-center">
-                    <div className="w-16 h-2 bg-slate-700 rounded-full"></div>
+            <div className="w-full lg:w-[450px] space-y-4 shrink-0">
+               <div className="flex items-center justify-between px-2">
+                 <div className="flex items-center gap-2">
+                   <TabButton active={activeTab === 'js'} onClick={() => setActiveTab('js')} label="Node.js" />
+                   <TabButton active={activeTab === 'python'} onClick={() => setActiveTab('python')} label="Python" />
+                   <TabButton active={activeTab === 'curl'} onClick={() => setActiveTab('curl')} label="cURL" />
+                 </div>
+               </div>
+               <div className="relative bg-[#0b0e14] rounded-3xl border border-slate-800 overflow-hidden font-mono text-xs shadow-2xl">
+                  <div className="flex items-center justify-between px-6 py-3 bg-white/5 border-b border-white/5">
+                    <span className="text-slate-500 font-bold uppercase tracking-widest text-[10px]">example_integration.{activeTab === 'python' ? 'py' : activeTab === 'js' ? 'js' : 'sh'}</span>
+                    <button onClick={() => handleCopy(getCodeSnippet(), setCopied)} className="text-slate-500 hover:text-white transition-colors">
+                      {copied ? <Check size={14} className="text-green-400" /> : <Copy size={14} />}
+                    </button>
                   </div>
-                  <div className="mt-12 flex flex-col items-center gap-6 px-6">
-                     <div className="w-24 h-24 rounded-3xl stacy-gradient p-1.5 shadow-2xl animate-float">
-                        <img src="https://files.catbox.moe/don5ye.jpg" className="w-full h-full object-cover rounded-2xl" />
-                     </div>
-                     <div className="w-full space-y-3">
-                       <div className="w-full h-3 bg-slate-800 rounded-full"></div>
-                       <div className="w-4/5 h-3 bg-slate-800 rounded-full"></div>
-                       <div className="w-3/5 h-3 bg-slate-800/50 rounded-full"></div>
-                     </div>
-                     <div className="mt-12 w-full h-40 bg-indigo-600/10 rounded-3xl border border-indigo-500/20 flex items-center justify-center">
-                        <div className="w-12 h-12 bg-white/10 rounded-full animate-pulse"></div>
-                     </div>
-                  </div>
+                  <pre className="p-6 text-indigo-200/90 leading-relaxed overflow-x-auto">
+                    {getCodeSnippet()}
+                  </pre>
                </div>
             </div>
           </div>
@@ -271,11 +282,39 @@ res = requests.post("https://api.stacy.ai/v1/chat", json={
               </button>
             </div>
           </div>
+          
+          <div className="p-4 bg-indigo-500/5 border border-indigo-500/10 rounded-2xl flex items-center gap-3">
+            <Zap size={16} className="text-indigo-400" />
+            <p className="text-xs text-indigo-200/60 font-medium">Use this key in your project as shown in the Documentation above.</p>
+          </div>
         </div>
       </section>
     </div>
   );
 };
+
+const TabButton: React.FC<{ active: boolean; onClick: () => void; label: string }> = ({ active, onClick, label }) => (
+  <button 
+    onClick={onClick}
+    className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${
+      active 
+        ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-600/20' 
+        : 'bg-slate-800/40 border-slate-700/50 text-slate-500 hover:text-slate-300'
+    }`}
+  >
+    {label}
+  </button>
+);
+
+const DocStep: React.FC<{ number: string; title: string; desc: string }> = ({ number, title, desc }) => (
+  <div className="flex items-center gap-4 p-4 bg-white/5 border border-white/5 rounded-2xl hover:bg-white/10 transition-colors">
+    <span className="text-xl font-black text-indigo-500/20">{number}</span>
+    <div>
+      <h4 className="text-xs font-black text-slate-200 uppercase tracking-widest">{title}</h4>
+      <p className="text-[11px] text-slate-500 font-medium">{desc}</p>
+    </div>
+  </div>
+);
 
 const StatCard: React.FC<{ icon: React.ReactNode; label: string; value: any; color: string }> = ({ icon, label, value, color }) => (
   <div className="glass-panel p-6 rounded-[2rem] border-slate-800 shadow-xl flex items-center justify-between bg-slate-900/30">

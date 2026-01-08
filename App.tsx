@@ -15,7 +15,6 @@ const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<Page>(Page.Home);
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   
   const [settings, setSettings] = useState<UserSettings>({
@@ -31,26 +30,6 @@ const App: React.FC = () => {
   });
 
   const t = translations[settings.language as Language] || translations.English;
-
-  // Sync logic for PWA Installation - capturing the native browser event
-  useEffect(() => {
-    const handleBeforeInstallPrompt = (e: Event) => {
-      // Prevent the mini-infobar from appearing on mobile
-      e.preventDefault();
-      // Stash the event so it can be triggered later.
-      setDeferredPrompt(e);
-      console.log('Native Install Prompt Captured');
-    };
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    
-    window.addEventListener('appinstalled', (evt) => {
-      setDeferredPrompt(null);
-      console.log('Stacy AI has been installed successfully');
-    });
-
-    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-  }, []);
 
   // Theme & Language logic
   useEffect(() => {
@@ -135,22 +114,6 @@ const App: React.FC = () => {
     setSettings(prev => ({ ...prev, theme: prev.theme === 'dark' ? 'light' : 'dark' }));
   };
 
-  const triggerInstall = async () => {
-    if (deferredPrompt) {
-      // Trigger the native browser install dialog
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      console.log(`User Choice Outcome: ${outcome}`);
-      // Clear the deferred prompt variable as it can only be used once
-      setDeferredPrompt(null);
-    } else {
-      // Fallback for browsers/devices where the event wasn't fired or isn't supported (like Safari)
-      alert(settings.language === 'French' 
-        ? "Le navigateur n'a pas encore détecté l'éligibilité APK.\n\nAssurez-vous d'utiliser Chrome sur Android, puis :\n1. Cliquez sur les (⋮) en haut à droite.\n2. Sélectionnez 'Installer l'application' ou 'Ajouter à l'écran d'accueil'." 
-        : "The browser has not detected APK eligibility yet.\n\nMake sure you use Chrome on Android, then:\n1. Tap the (⋮) menu in the top right.\n2. Select 'Install app' or 'Add to Home screen'.");
-    }
-  };
-
   const renderPage = () => {
     switch (currentPage) {
       case Page.Home:
@@ -159,7 +122,7 @@ const App: React.FC = () => {
         const activeSession = sessions.find(s => s.id === activeSessionId);
         return <ChatView session={activeSession} settings={settings} updateMessages={(msgs) => activeSessionId && setSessions(prev => prev.map(s => s.id === activeSessionId ? {...s, messages: msgs, updatedAt: Date.now()} : s))} avatar={STACY_AVATAR} onConsume={consumeCredit} />;
       case Page.Dashboard:
-        return <div className="flex-1 overflow-y-auto px-4 md:px-8 py-6 scrollbar-thin"><Dashboard settings={settings} generateKey={generateApiKey} sessionsCount={sessions.length} installApp={triggerInstall} canInstall={!!deferredPrompt} onConsume={consumeCredit} /></div>;
+        return <div className="flex-1 overflow-y-auto px-4 md:px-8 py-6 scrollbar-thin"><Dashboard settings={settings} generateKey={generateApiKey} sessionsCount={sessions.length} onConsume={consumeCredit} /></div>;
       case Page.Settings:
         return <div className="flex-1 overflow-y-auto px-4 md:px-8 py-6 scrollbar-thin"><Settings settings={settings} onUpdate={setSettings} onClearHistory={clearAllHistory} /></div>;
       default:
